@@ -61,18 +61,28 @@ includelib /masm32/lib/kernel32.lib
     d_negative_single DD -0.001
 	
 	;E:
-	
-	e_double_string DB "+E = +0,323 = %x%x (DOUBLE)", 0
+	e_double_string DB "E = 0,098 = %x%x (Double)", 0
     e_double_buffer DB 32 DUP (?)
-    e_double DQ +0.323
+    e_double DQ +0,098
 	
-    e_negative_double_string DB "-E = -0,323 = %x%x (DOUBLE)", 0
+    e_negative_double_string DB "-E = -0,098 = %x%x (Double)", 0
     e_negative_double_buffer DB 32 DUP (?)
-    e_negative_double DQ -0.323
+    e_negative_double DQ -0,098
+	
+	;F:
+	f_long_double_string DB "F = 978.522 = %x%x (Long Double)", 0
+    f_long_double_buffer DB 64 DUP (?)
+    f_long_double DT +978.522
+	
+    f_negative_long_double_string DB "-F = -978.522 = %x%x (Long Double)", 0
+    f_negative_long_double_buffer DB 64 DUP (?)
+    f_negative_long_double DT -978.522
 	
 
     msg_str DB "%s", 13,
         "%s", 13,
+		"%s", 13,
+		"%s", 13,
 		"%s", 13,
 		"%s", 13,
 		"%s", 13,
@@ -104,6 +114,8 @@ includelib /masm32/lib/kernel32.lib
 	invoke wsprintf, addr d_negative_single_buffer, addr d_negative_single_string, d_negative_single
 	invoke wsprintf, addr e_double_buffer, addr e_double_string, e_double
 	invoke wsprintf, addr e_negative_double_buffer, addr e_negative_double_string, e_negative_double
+	invoke wsprintf, addr f_long_double_buffer, addr f_long_double_string, f_long_double
+	invoke wsprintf, addr f_negative_long_double_buffer, addr f_negative_long_double_string, f_negative_long_double
 
 	invoke wsprintf, addr msg_buf, addr msg_str,
         addr symbol_buf,
@@ -118,7 +130,9 @@ includelib /masm32/lib/kernel32.lib
 		addr d_single_buffer,
 		addr d_negative_single_buffer,
 		addr e_double_buffer,
-		addr e_negative_double_buffer
+		addr e_negative_double_buffer,
+		addr f_long_double_buffer,
+		addr f_negative_long_double_buffer
 		
 	invoke MessageBox, 0, addr msg_buf, addr dlg_header, MB_OK
     invoke ExitProcess, 0
