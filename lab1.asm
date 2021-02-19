@@ -63,11 +63,11 @@ includelib /masm32/lib/kernel32.lib
 	;E:
 	e_double_string DB "E = 0,098 = %x%x (Double)", 0
     e_double_buffer DB 32 DUP (?)
-    e_double DQ +0,098
+    e_double DQ +0.098
 	
     e_negative_double_string DB "-E = -0,098 = %x%x (Double)", 0
     e_negative_double_buffer DB 32 DUP (?)
-    e_negative_double DQ -0,098
+    e_negative_double DQ -0.098
 	
 	;F:
 	f_long_double_string DB "F = 978.522 = %x%x (Long Double)", 0
