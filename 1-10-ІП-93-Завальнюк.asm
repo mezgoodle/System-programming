@@ -18,7 +18,7 @@ include /masm32/include/masm32rt.inc
 .data
     dlg_header DB "Lab 1", 0
 	
-	form db "Symbol = %d" ,10, 
+	form db "My symbol = %d" ,10, 
 		"A = %d", 10, "-A = %d", 10, 
 		"B = %d", 10, "-B = %d", 10, 
 		"C = %d", 10, "-C = %d", 10, 
