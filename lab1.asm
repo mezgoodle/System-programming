@@ -18,7 +18,13 @@ include /masm32/include/masm32rt.inc
 .data
     dlg_header DB "Lab 1", 0
 	
-	form db "Symbol = %d" ,10, "A = %d", 10, "-A = %d", 10, "B = %d", 10, "-B = %d", 10, "C = %d", 10, "-C = %d", 10, "D = %s", 10, "-D = %s", 10,"E = %s", 10, "-E = %s", 10, "F = %s", 10, "-F = %s", 0 
+	form db "Symbol = %d" ,10, 
+		"A = %d", 10, "-A = %d", 10, 
+		"B = %d", 10, "-B = %d", 10, 
+		"C = %d", 10, "-C = %d", 10, 
+		"D = %s", 10, "-D = %s", 10,
+		"E = %s", 10, "-E = %s", 10, 
+		"F = %s", 10, "-F = %s", 0 
 	
 	; Whole number:
     symbol DD 0911200
