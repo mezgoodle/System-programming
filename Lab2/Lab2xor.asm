@@ -3,11 +3,12 @@
 .data
     START_MSG     DB "Введ?ть пароль: $"
     ERROR_MSG     DB "Помилка $"
-    PASSWD        DB "genji"
+    PASSWD        DB "nlgc`"
     DATA          DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
     PASSWD_LEN    DB 7
     USR_INPUT     DB 32 DUP (?)
 	TEMP		  DB 0
+	KEY			  DB 9h
 .code
 .startup
     MAIN: 
@@ -33,6 +34,7 @@
     VALIDATION:
     ; COMPARING CHARACTERS
     MOV        BL, USR_INPUT[DI]
+	XOR		   BL, KEY
     MOV        BH, PASSWD[DI]
     CMP        BL, BH
     JNE        ERR
