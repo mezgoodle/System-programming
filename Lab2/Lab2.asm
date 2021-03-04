@@ -1,13 +1,13 @@
 .model tiny
 .stack 100h
 .data
-    START_MSG       DB "Введiть пароль, для цього у вас є 3 спроби: $"
-    ERROR_MSG_1     DB "Помилка, введiть ще раз: $"
-	ERROR_MSG_2     DB "Ви вичерпали свої спроби $"
-    PASSWD          DB "genji"
-    DATA            DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
-    PASSWD_LEN      DB 7
-    USR_INPUT       DB 32 DUP (?)
+    START_MESSAGE       DB "Введiть пароль, для цього у вас є 3 спроби: $"
+    ERROR_MESSAGE_1     DB "Помилка, введiть ще раз: $"
+	ERROR_MESSAGE_2     DB "Ви вичерпали свої спроби $"
+    PASSWORD          DB "genji"
+    INFORMATION            DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
+    PASSWORD_LEN      DB 7
+    INPUT_TEXT       DB 32 DUP (?)
 	TEMP		    DB 0
 .code
 .startup
@@ -18,13 +18,13 @@
 
     ; PRINTING START MESSAGE
     MOV     AH, 09h
-    MOV     DX, offset START_MSG
+    MOV     DX, offset START_MESSAGE
     INT     21h
 
     INPUT:
     ; READING USER'S INPUT
     MOV        AH, 3Fh
-    MOV        DX, offset USR_INPUT
+    MOV        DX, offset INPUT_TEXT
     INT        21h
 
     ; CHECKING LENGTH
@@ -33,8 +33,8 @@
     MOV        DI, 0
     CHECKING:
     ; COMPARING CHARACTERS
-    MOV        BL, USR_INPUT[DI]
-    MOV        BH, PASSWD[DI]
+    MOV        BL, INPUT_TEXT[DI]
+    MOV        BH, PASSWORD[DI]
     CMP        BL, BH
     JNE        ERR
 
@@ -49,7 +49,7 @@
 	MOV        AX, 03h
 	INT        10h
     MOV        AH, 09h
-    MOV        DX, offset DATA
+    MOV        DX, offset INFORMATION
     INT        21h 
 	JMP		   EXIT
 
@@ -66,7 +66,7 @@
 
         ;error msg
         MOV AH, 09h
-        MOV dx, offset ERROR_MSG_1
+        MOV dx, offset ERROR_MESSAGE_1
         INT 21h
 		INC TEMP
 		CMP TEMP, 3
@@ -76,7 +76,7 @@
         INT 10h
 		;error msg
         MOV AH, 09h
-        MOV dx, offset ERROR_MSG_2
+        MOV dx, offset ERROR_MESSAGE_2
 		INT 21h
 		JMP exit	
 END
