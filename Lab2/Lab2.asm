@@ -1,7 +1,7 @@
 .model tiny
 .stack 100h
 .data
-    START_MSG     DB "Введ?ть пароль: $"
+    START_MSG     DB "Введiть пароль: $"
     ERROR_MSG     DB "Помилка $"
     PASSWD        DB "genji"
     DATA          DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
