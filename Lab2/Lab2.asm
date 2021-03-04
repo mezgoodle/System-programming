@@ -27,12 +27,12 @@
     MOV        DX, offset INPUT_TEXT
     INT        21h
 
-    ; Check the length of input text
+    COMPARING:
+	; Check the length of input text
     CMP        AX, 7
 	JNE		   ERR
     MOV        DI, 0
 
-    COMPARING:
     ; Compare by each character
     MOV        BL, INPUT_TEXT[DI]
     MOV        BH, PASSWORD[DI]
