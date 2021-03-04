@@ -8,7 +8,7 @@
     INFORMATION         DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
     PASSWORD_LEN        DB 7
     INPUT_TEXT          DB 32 DUP (?)
-	ATTEMPTS		        DB 0
+	ATTEMPTS		    DB 0
 .code
 .startup
     MAIN: 
