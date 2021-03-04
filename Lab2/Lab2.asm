@@ -16,23 +16,24 @@
     MOV     AX, 03h
     INT     10h
 
-    ; PRINTING START MESSAGE
+    ; Print the start message on the screan
     MOV     AH, 09h
     MOV     DX, offset START_MESSAGE
     INT     21h
 
     INPUT:
-    ; READING USER'S INPUT
+    ; Read text from user
     MOV        AH, 3Fh
     MOV        DX, offset INPUT_TEXT
     INT        21h
 
-    ; CHECKING LENGTH
+    ; Check the length of input text
     CMP        AX, 7
 	JNE		   ERR
     MOV        DI, 0
-    CHECKING:
-    ; COMPARING CHARACTERS
+
+    COMPARING:
+    ; Compare by each character
     MOV        BL, INPUT_TEXT[DI]
     MOV        BH, PASSWORD[DI]
     CMP        BL, BH
@@ -42,7 +43,7 @@
     INC        DI
     CMP        DI, 5
 	JE		   CORRECT
-    LOOP       CHECKING
+    LOOP       COMPARING
 
 	CORRECT:
 	; Cleaning the screan
@@ -53,7 +54,7 @@
     INT        21h 
 	JMP		   EXIT
 
-    ; END PROCESS
+    ; Last proccess
     EXIT:
     MOV        AH, 4Ch
     MOV        AL, 0
@@ -64,17 +65,19 @@
         MOV AX, 03h
         INT 10h
 
-        ;error msg
+        ; Print the error message on the screan
         MOV AH, 09h
         MOV dx, offset ERROR_MESSAGE_1
         INT 21h
 		INC ATTEMPTS
 		CMP ATTEMPTS, 3
 		JNE INPUT
+		
 		; Cleaning the screan
         MOV AX, 03h
         INT 10h
-		;error msg
+
+		; Print the error message on the screan
         MOV AH, 09h
         MOV dx, offset ERROR_MESSAGE_2
 		INT 21h
