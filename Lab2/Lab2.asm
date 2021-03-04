@@ -4,9 +4,10 @@
     START_MSG     DB "Введ?ть пароль: $"
     ERROR_MSG     DB "Помилка $"
     PASSWD        DB "genji"
-    DATA          DB "Хогер не ?мба", 10, "IП-9312", 10, "30.11.2001 $"
-    PASSWD_LEN    DB 5
+    DATA          DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
+    PASSWD_LEN    DB 7
     USR_INPUT     DB 32 DUP (?)
+	TEMO		  DB 2
 .code
 .startup
     MAIN: 
@@ -26,8 +27,8 @@
     INT     21h
 
     ; CHECKING LENGTH
-    CMP     AX, 7
-    JNE        ERR
+    CMP     AX, PASSWD_LEN
+    JNE     ERR
     MOV     DI, 0
     VALIDATION:
     ; COMPARING CHARACTERS
@@ -60,6 +61,6 @@
         mov ah, 09h
         mov dx, offset ERROR_MSG; msg of output
         int 21h
-
-        jmp exit
+		cmp TEMO,3
+		je exit
 END
