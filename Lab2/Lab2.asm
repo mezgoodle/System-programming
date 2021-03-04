@@ -4,11 +4,11 @@
     START_MESSAGE       DB "Введiть пароль, для цього у вас є 3 спроби: $"
     ERROR_MESSAGE_1     DB "Помилка, введiть ще раз: $"
 	ERROR_MESSAGE_2     DB "Ви вичерпали свої спроби $"
-    PASSWORD          DB "genji"
-    INFORMATION            DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
-    PASSWORD_LEN      DB 7
-    INPUT_TEXT       DB 32 DUP (?)
-	TEMP		    DB 0
+    PASSWORD            DB "genji"
+    INFORMATION         DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
+    PASSWORD_LEN        DB 7
+    INPUT_TEXT          DB 32 DUP (?)
+	ATTEMPTS		        DB 0
 .code
 .startup
     MAIN: 
@@ -68,8 +68,8 @@
         MOV AH, 09h
         MOV dx, offset ERROR_MESSAGE_1
         INT 21h
-		INC TEMP
-		CMP TEMP, 3
+		INC ATTEMPTS
+		CMP ATTEMPTS, 3
 		JNE INPUT
 		; Cleaning the screan
         MOV AX, 03h
