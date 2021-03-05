@@ -1,73 +1,87 @@
 .model tiny
 .stack 100h
 .data
-    START_MSG     DB "Введ?ть пароль: $"
-    ERROR_MSG     DB "Помилка $"
-    PASSWD        DB "nlgc`"
-    DATA          DB "Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
-    PASSWD_LEN    DB 7
-    USR_INPUT     DB 32 DUP (?)
-	TEMP		  DB 0
-	KEY			  DB 9h
+    START_MESSAGE       DB "Введiть пароль, для цього у вас є 3 спроби: $"
+    ERROR_MESSAGE_1     DB "Помилка, введiть ще раз: $"
+	ERROR_MESSAGE_2     DB "Ви вичерпали свої спроби $"
+    PASSWORD            DB "nlgc`"
+    INFORMATION         DB "Ви ввели правильний пароль.", 10, "?нформац?я:", 10,"Завальнюк Максим Євгенович", 10, "IП-9312", 10, "09.11.2001 $"
+    PASSWORD_LEN        DB 7
+    INPUT_TEXT          DB 32 DUP (?)
+	ATTEMPTS		    DB 0
+	KEY			        DB 9h
 .code
 .startup
     MAIN: 
-    ; CLEARING SCREEN
+    ; Cleaning the screan
     MOV     AX, 03h
     INT     10h
 
-    ; PRINTING START MESSAGE
+    ; Print the start message on the screan
     MOV     AH, 09h
-    MOV     DX, offset START_MSG
+    MOV     DX, offset START_MESSAGE
     INT     21h
 
     INPUT:
-    ; READING USER'S INPUT
+    ; Read text from user
     MOV        AH, 3Fh
-    MOV        DX, offset USR_INPUT
+    MOV        DX, offset INPUT_TEXT
     INT        21h
 
-    ; CHECKING LENGTH
+    COMPARING:
+	; Check the length of input text
     CMP        AX, 7
 	JNE		   ERR
     MOV        DI, 0
-    VALIDATION:
-    ; COMPARING CHARACTERS
-    MOV        BL, USR_INPUT[DI]
+
+    ; Compare by each character
+    MOV        BL, INPUT_TEXT[DI]
 	XOR		   BL, KEY
-    MOV        BH, PASSWD[DI]
+    MOV        BH, PASSWORD[DI]
     CMP        BL, BH
     JNE        ERR
 
     ; INCREASING COUNTER
     INC        DI
     CMP        DI, 5
-	JE		   WHOOORAY
-    loop       VALIDATION
+	JE		   CORRECT
+    LOOP       COMPARING
 
-	WHOOORAY:
+	CORRECT:
+	; Cleaning the screan
+	MOV        AX, 03h
+	INT        10h
     MOV        AH, 09h
-    MOV        DX, offset DATA
+    MOV        DX, offset INFORMATION
     INT        21h 
+	JMP		   EXIT
 
-    ; END PROCESS
+    ; Last proccess
     EXIT:
     MOV        AH, 4Ch
     MOV        AL, 0
     INT        21h
 
     ERR:
-        ;clean console
+        ; Cleaning the screan
         MOV AX, 03h
         INT 10h
 
-        ;error msg
+        ; Print the error message on the screan
         MOV AH, 09h
-        MOV dx, offset ERROR_MSG; msg of output
+        MOV dx, offset ERROR_MESSAGE_1
         INT 21h
-		INC TEMP
-		CMP TEMP, 3
+		INC ATTEMPTS
+		CMP ATTEMPTS, 3
 		JNE INPUT
-		JE exit
 		
+		; Cleaning the screan
+        MOV AX, 03h
+        INT 10h
+
+		; Print the error message on the screan
+        MOV AH, 09h
+        MOV dx, offset ERROR_MESSAGE_2
+		INT 21h
+		JMP exit	
 END
