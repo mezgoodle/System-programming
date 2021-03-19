@@ -17,7 +17,7 @@ includelib /masm32/lib/kernel32.lib
 	edit_attr db "edit", 0
     button_attr db "button", 0
 	; Text variables
-	data db "ПІБ: Завальнюк М.Є.", 13, "Номер залікової книги: 9312", 13, "Дата народження: 09.11.2001", 0
+	student_data db "ПІБ: Завальнюк М.Є.", 13, "Номер залікової книги: 9312", 13, "Дата народження: 09.11.2001", 0
 	greeting_text db "Введіть пароль:", 0
 	error_text db "Помилка! Перевірте введений вами пароль.", 0
 	title_text db "Дані", 0
@@ -191,7 +191,7 @@ Our_WINDOW proc 	hWnd 	:dword,
 		
     	SHOW_DATA:
 		; Show my data
-    	invoke MessageBox, hWnd, ADDR data, ADDR title_text, MB_OK
+    	invoke MessageBox, hWnd, ADDR student_data, ADDR title_text, MB_OK
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
         RET
