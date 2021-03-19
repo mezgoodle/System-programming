@@ -8,16 +8,6 @@ include /masm32/include/kernel32.inc
 includelib /masm32/lib/user32.lib
 includelib /masm32/lib/kernel32.lib
 
-szText macro name, text:vararg
-	local lbl
-	jmp	lbl
-	name db text, 0
-	lbl:
-endm
-
-Main_WINDOW proto :dword, :dword, :dword, :dword
-Our_WINDOW proto :dword, :dword, :dword, :dword
-
 .data
 	; Password
 	password db "nlgc`"
@@ -34,12 +24,20 @@ Our_WINDOW proto :dword, :dword, :dword, :dword
 	title_text db "Дані", 0
 	error_title_text db "Помилка!", 0
 	on_button_text db "Ввести", 0
-
-.data?
 	hInstance 		dd ?
 	lpszCmdLine		dd ?
 	edit_field 		HWND ?
 	input_text db 64 DUP (?)
+	
+Main_WINDOW proto :dword, :dword, :dword, :dword
+Our_WINDOW proto :dword, :dword, :dword, :dword
+
+szText macro name, text:vararg
+	local lbl
+	jmp	lbl
+	name db text, 0
+	lbl:
+endm
 
 .code
 start:
