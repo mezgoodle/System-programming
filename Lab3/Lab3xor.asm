@@ -15,182 +15,194 @@ szText macro name, text:vararg
 	lbl:
 endm
 
-WinMain proto :dword, :dword, :dword, :dword
-WndProc proto :dword, :dword, :dword, :dword
+Main_WINDOW proto :dword, :dword, :dword, :dword
+Our_WINDOW proto :dword, :dword, :dword, :dword
 
 .data
-	data db "Завальнюк М.Є.", 13, "9312", 13, "09.11.2001", 0
-	text db "Введіть пароль:", 0
-	err db "Помилка! Перевірте введений вами пароль.", 0
-	msg_title db "Дані", 0
-	butt_text db "Ввести", 0
-	static db "static", 0
-	edit db "edit", 0
-    butt db "button", 0
-	pass db "nlgc`"
-	KEY	DB 9h
-	pass_len dw 5
+	; Password
+	password db "nlgc`"
+	password_length dw 5
+	KEY DB 9h
+	; Attributes variables for windows
+	static_attr db "static", 0
+	edit_attr db "edit", 0
+    button_attr db "button", 0
+	; Text variables
+	data db "ПІБ: Завальнюк М.Є.", 13, "Номер залікової книги: 9312", 13, "Дата народження: 09.11.2001", 0
+	greeting_text db "Введіть пароль:", 0
+	error_text db "Помилка! Перевірте введений вами пароль.", 0
+	title_text db "Дані", 0
+	error_title_text db "Помилка!", 0
+	on_button_text db "Ввести", 0
 
 .data?
 	hInstance 		dd ?
 	lpszCmdLine		dd ?
-	hEditText 		HWND ?
-	input db 64 DUP (?)
+	edit_field 		HWND ?
+	input_text db 64 DUP (?)
 
 .code
 start:
 	invoke 	GetModuleHandle, NULL
-	mov	hInstance, eax
+	MOV	hInstance, eax
 
 	invoke	GetCommandLine
-	mov	lpszCmdLine, eax
+	MOV	lpszCmdLine, eax
 
-	invoke 	WinMain, hInstance, NULL, lpszCmdLine, SW_SHOWDEFAULT
+	invoke 	Main_WINDOW, hInstance, NULL, lpszCmdLine, SW_SHOWDEFAULT
 	invoke	ExitProcess, eax
 
-WinMain proc 	hInst 		:dword, 
-		hPrevInst 	:dword,
-		szCmdLine 	:dword,
-		nShowCmd 	:dword
+Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 
 	local 	wc 	:WNDCLASSEX
 	local 	msg 	:MSG
 	local 	hWnd 	:HWND
 
-	szText	szClassName, "BasicWindow"
+	szText	szClassName, "Main_Window"
 	szText	szWindowTitle, "Лабораторна номер 3"
 
-	mov	wc.cbSize, sizeof WNDCLASSEX
-	mov	wc.style, CS_HREDRAW or CS_VREDRAW or CS_BYTEALIGNWINDOW
-	mov 	wc.lpfnWndProc, WndProc
-	mov 	wc.cbClsExtra, NULL
-	mov	wc.cbWndExtra, NULL
+	MOV	wc.cbSize, sizeof WNDCLASSEX
+	MOV	wc.style, CS_HREDRAW or CS_VREDRAW or CS_BYTEALIGNWINDOW
+	MOV wc.lpfnWndProc, Our_WINDOW
+	MOV wc.cbClsExtra, NULL
+	MOV	wc.cbWndExtra, NULL
 
-	push	hInst
-	pop 	wc.hInstance
+	PUSH hInst
+	POP wc.hInstance
 
-	mov	wc.hbrBackground, COLOR_BTNFACE + 1
-	mov	wc.lpszMenuName, NULL
-	mov 	wc.lpszClassName, offset szClassName
+	MOV	wc.hbrBackground, COLOR_BTNFACE + 1
+	MOV	wc.lpszMenuName, NULL
+	MOV wc.lpszClassName, offset szClassName
 
-	invoke	LoadIcon, hInst, IDI_APPLICATION
-	mov	wc.hIcon, eax
-	mov	wc.hIconSm, eax
+	invoke LoadIcon, hInst, IDI_APPLICATION
+	MOV	wc.hIcon, eax
+	MOV	wc.hIconSm, eax
 
-	invoke	LoadCursor, hInst, IDC_ARROW
-	mov	wc.hCursor, eax
+	invoke LoadCursor, hInst, IDC_ARROW
+	MOV	wc.hCursor, eax
 
-	invoke	RegisterClassEx, addr wc
+	invoke RegisterClassEx, ADDR wc
 
-	invoke	CreateWindowEx, WS_EX_APPWINDOW, addr szClassName, addr szWindowTitle,
+	invoke CreateWindowEx, WS_EX_APPWINDOW, ADDR szClassName, ADDR szWindowTitle,
 				WS_OVERLAPPEDWINDOW, 
-				300, 300, 300, 300, 
+				300, 300, 360, 63, 
 				NULL, NULL, hInst, NULL
 
-	mov	hWnd, eax
+	MOV	hWnd, eax
 
 	invoke	ShowWindow, hWnd, nShowCmd
 	invoke	UpdateWindow, hWnd
 
-MessagePump:
-	invoke 	GetMessage, addr msg, NULL, 0, 0
+PumpTheMessage:
+	invoke GetMessage, ADDR msg, NULL, 0, 0
 
-	cmp 	eax, 0
-	je 	MessagePumpEnd
+	CMP eax, 0
+	JE PumpTheMessageEnd
 
-	invoke	TranslateMessage, addr msg
-	invoke	DispatchMessage, addr msg
+	invoke TranslateMessage, ADDR msg
+	invoke DispatchMessage, ADDR msg
 
-	jmp 	MessagePump
+	JMP PumpTheMessage
 
-MessagePumpEnd:
+PumpTheMessageEnd:
 
-	mov	eax, msg.wParam
-	ret
+	MOV	eax, msg.wParam
+	RET
 
-WinMain endp
+Main_WINDOW endp
 
 
-WndProc proc 	hWnd 	:dword,
+Our_WINDOW proc 	hWnd 	:dword,
 		uMsg 	:dword,
 		wParam 	:dword,
 		lParam 	:dword
 
+	; Create the main window
 	.if uMsg==WM_CREATE
+	; Show greeting text
 		invoke CreateWindowEx,NULL,
-                addr static,
-                addr text,
+                ADDR static_attr,
+                ADDR greeting_text,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
-                70,
-                90,
-                150,
+                0,
+                2,
+                140,
                 20,
                 hWnd,
-                2001,
+                0001,
                 hInstance,
                 NULL
+	; Show input field for text
 		invoke CreateWindowEx,NULL,
-                addr edit,
+                ADDR edit_attr,
                 NULL,
                 WS_VISIBLE or WS_CHILD or ES_LEFT or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_BORDER,
-                70,
-                110,
-                150,
+                140,
+                0,
+                100,
                 20,
                 hWnd,
-                2000,
+                0000,
                 hInstance,
                 NULL 
-        mov hEditText, eax
+        MOV edit_field, eax
+	; Show button with text
         invoke CreateWindowEx,NULL,
-                addr butt,
-                addr butt_text,
+                ADDR button_attr,
+                ADDR on_button_text,
                 WS_VISIBLE or WS_CHILD,
-                70,
-                130,
-                150,
+				251,
+                0,
+                80,
                 20,
                 hWnd,
-                2002,
+                0002,
                 hInstance,
                 NULL
-	.elseif uMsg == WM_DESTROY
+	; Close the window
+	.elseif uMsg == WM_CLOSE
 		invoke 	PostQuitMessage, 0
-		xor	eax, eax
-		ret
-		.elseif uMsg == WM_COMMAND
-    	cmp wParam, 2002
-    	jne quit
-    	invoke SendMessage, hEditText, WM_GETTEXT, 40, addr input
-		mov di, 0
-		cycle:
-    	cmp ax, pass_len
-		jne err_msg
-    	
-    	
-    	mov BL, input[di]
-		XOR		   BL, KEY
-		mov BH, pass[di]
-    	cmp BL, BH
-		JNE err_msg
-		; INCREASING COUNTER
-		inc di
-		cmp di, pass_len
-    	je data_msg
-		LOOP       cycle
+		XOR	eax, eax
+		RET
+	; Main part
+	.elseif uMsg == WM_COMMAND
+    	CMP wParam, 0002
+    	JNE QUIT
+    	invoke SendMessage, edit_field, WM_GETTEXT, 40, ADDR input_text
+		MOV di, 0
+
+		; COMPARING
+		COMPARING:
+    	CMP ax, password_length
+		JNE SHOW_ERROR
+    	MOV BL, input_text[di]
+		XOR BL, KEY
+		MOV BH, password[di]
+    	CMP BL, BH
+		JNE SHOW_ERROR
 		
-    	err_msg:
-    	invoke MessageBox, hWnd, addr err, addr msg_title, MB_OK
-    	jmp quit
-    	data_msg:
-    	invoke MessageBox, hWnd, addr data, addr msg_title, MB_OK
+		; INCREASING COUNTER
+		INC di
+		CMP di, password_length
+		; Check the finish
+    	JE SHOW_DATA
+		LOOP COMPARING
+		
+    	SHOW_ERROR:
+		; Show error while input text
+    	invoke MessageBox, hWnd, ADDR error_text, ADDR error_title_text, MB_OK
+    	JMP QUIT
+		
+    	SHOW_DATA:
+		; Show my data
+    	invoke MessageBox, hWnd, ADDR data, ADDR title_text, MB_OK
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
-        ret
+        RET
 	.endif
-		quit:
-    	xor eax, eax
-    	ret
-WndProc endp
+		QUIT:
+    	XOR eax, eax
+    	RET
+Our_WINDOW endp
 
 end start
