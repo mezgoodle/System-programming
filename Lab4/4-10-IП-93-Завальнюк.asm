@@ -184,14 +184,7 @@ Our_WINDOW proc 	hWnd 	:dword,
                 OFFSET button_attr,
                 OFFSET on_button_text,
                 WS_VISIBLE or WS_CHILD,
-				251,
-                0,
-                80,
-                20,
-                hWnd,
-                0002,
-                hInstance,
-                NULL
+				251, 0, 80, 20, hWnd, 0002, hInstance, NULL
 	; Close the window
 	.elseif uMsg == WM_CLOSE
 		invoke 	PostQuitMessage, 0
