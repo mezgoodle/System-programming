@@ -193,11 +193,11 @@ Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
     	CMP wParam, 44832
     	JNE QUIT
     	invoke SendMessage, edit_field, WM_GETTEXT, 40, OFFSET input_text
-		MOV di, 0
+		MOV edi, 0
 
 		; COMPARING
 		COMPARING:
-    	CMP ax, length_of_password
+    	CMP eax, length_of_password
 		JNE SHOW_ERROR
 		; Call macroses
 		DECRYPT input_text

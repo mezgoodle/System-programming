@@ -1,25 +1,26 @@
-SHOW_TEXT macro text, y
+SHOW_TEXT macro text, y_ordinate
 	; Macros for showing
-	;; Show data in window interface
+	;;Show data in window interface
 	invoke CreateWindowEx,NULL,
         addr static_attr,
         text,
-        SS_CENTER or WS_CHILD or WS_VISIBLE,
-        75, y, 150, 100, hWnd, 2001, hInstance, NULL
+        WS_VISIBLE or WS_CHILD or SS_CENTER,
+        75, y_ordinate, 150, 100, hWnd, 4483, hInstance, NULL
 endm
 
 COMPARE macro input
 	; Macros for comparing
-	;; Comparing the input text and password
+	;;Comparing the input text and password
 	local COMPARING
 	local QUIT
-	MOV edi, -1
+	MOV di, -1
+	; Main part
     COMPARING:
-	INC edi
-    CMP edi, length_of_password
+	INC di
+    CMP di, length_of_password
 	JE QUIT
-	MOV BL, input[edi]
-	MOV BH, password[edi]
+	MOV BL, input[di]
+	MOV BH, password[di]
     CMP BL, BH
     JNE SHOW_ERROR
 	LOOP COMPARING
@@ -31,12 +32,13 @@ DECRYPT macro input
 	;; Decrypting the input text
 	local DECRYPTING
 	local QUIT
-	MOV edi, 0
+	MOV di, 0
+	; Main part
     DECRYPTING:
 	MOV dh, KEY
-    XOR input[edi], dh
-    INC edi
-    CMP edi, length_of_password
+    XOR input[di], dh
+    INC di
+    CMP di, length_of_password
     JE QUIT
 	LOOP DECRYPTING
 	QUIT:
