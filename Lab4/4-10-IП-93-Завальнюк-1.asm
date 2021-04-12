@@ -12,7 +12,7 @@ include 4-10-IП-93-Завальнюк-1.inc
 .data
 	; Password
 	password db "nlgc`"
-	password_length dw 5
+	length_of_password dw 5
 	KEY DB 9h
 	; Attributes variables for windows
 	static_attr db "static", 0
@@ -35,13 +35,6 @@ include 4-10-IП-93-Завальнюк-1.inc
 Main_WINDOW proto :dword, :dword, :dword, :dword
 Our_WINDOW proto :dword, :dword, :dword, :dword	
 
-szText macro name, text:vararg
-	local lbl
-	jmp	lbl
-	name db text, 0
-	lbl:
-endm
-
 .code
 start:
 	invoke 	GetModuleHandle, NULL
@@ -53,14 +46,24 @@ start:
 	invoke 	Main_WINDOW, hInstance, NULL, lpszCmdLine, SW_SHOWDEFAULT
 	invoke	ExitProcess, eax
 
+MessageCreating:
+	invoke GetMessage, OFFSET msg, NULL, 0, 0
+	CMP eax, 0
+	JE MessageDestructing
+	invoke TranslateMessage, OFFSET msg
+	invoke DispatchMessage, OFFSET msg
+	JMP MessageCreating
+
+MessageDestructing:
+	MOV	eax, msg.wParam
+	RET
+
+
 Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 
 	local 	wc 	:WNDCLASSEX
 	local 	msg 	:MSG
 	local 	hWnd 	:HWND
-
-	szText	szClassName, "Main_Window"
-	szText	szWindowTitle, "Лабораторна номер 4"
 
 	MOV	wc.cbSize, sizeof WNDCLASSEX
 	MOV	wc.style, CS_HREDRAW or CS_VREDRAW or CS_BYTEALIGNWINDOW
@@ -82,9 +85,9 @@ Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 	invoke LoadCursor, hInst, IDC_ARROW
 	MOV	wc.hCursor, eax
 
-	invoke RegisterClassEx, ADDR wc
+	invoke RegisterClassEx, OFFSET wc
 
-	invoke CreateWindowEx, WS_EX_APPWINDOW, ADDR szClassName, ADDR szWindowTitle,
+	invoke CreateWindowEx, WS_EX_APPWINDOW, OFFSET szClassName, OFFSET szWindowTitle,
 				WS_OVERLAPPEDWINDOW, 
 				300, 300, 360, 263, 
 				NULL, NULL, hInst, NULL
@@ -93,22 +96,6 @@ Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 
 	invoke	ShowWindow, hWnd, nShowCmd
 	invoke	UpdateWindow, hWnd
-
-PumpTheMessage:
-	invoke GetMessage, ADDR msg, NULL, 0, 0
-
-	CMP eax, 0
-	JE PumpTheMessageEnd
-
-	invoke TranslateMessage, ADDR msg
-	invoke DispatchMessage, ADDR msg
-
-	JMP PumpTheMessage
-
-PumpTheMessageEnd:
-
-	MOV	eax, msg.wParam
-	RET
 
 Main_WINDOW endp
 
@@ -122,8 +109,8 @@ Our_WINDOW proc 	hWnd 	:dword,
 	.if uMsg==WM_CREATE
 	; Show greeting text
 		invoke CreateWindowEx,NULL,
-                ADDR static_attr,
-                ADDR greeting_text,
+                OFFSET static_attr,
+                OFFSET greeting_text,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
                 0,
                 2,
@@ -135,7 +122,7 @@ Our_WINDOW proc 	hWnd 	:dword,
                 NULL
 	; Show input field for text
 		invoke CreateWindowEx,NULL,
-                ADDR edit_attr,
+                OFFSET edit_attr,
                 NULL,
                 WS_VISIBLE or WS_CHILD or ES_LEFT or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_BORDER,
                 140,
@@ -149,8 +136,8 @@ Our_WINDOW proc 	hWnd 	:dword,
         MOV edit_field, eax
 	; Show button with text
         invoke CreateWindowEx,NULL,
-                ADDR button_attr,
-                ADDR on_button_text,
+                OFFSET button_attr,
+                OFFSET on_button_text,
                 WS_VISIBLE or WS_CHILD,
 				251,
                 0,
@@ -167,31 +154,29 @@ Our_WINDOW proc 	hWnd 	:dword,
 		RET
 	; Main part
 	.elseif uMsg == WM_COMMAND
-    	CMP wParam, 0002
+    	CMP wParam, 4473
     	JNE QUIT
-    	invoke SendMessage, edit_field, WM_GETTEXT, 40, ADDR input_text
-		MOV di, 0
+    	invoke SendMessage, edit_field, WM_GETTEXT, length_of_password + 2, OFFSET input_text
+		MOV edi, 0
 
 		; COMPARING
 		COMPARING:
-    	CMP ax, password_length
+    	CMP eax, length_of_password
 		JNE SHOW_ERROR
 		DECRYPT input_text
 		COMPARE input_text
-		cmp bl, 0
+		cmp bl, -1
 		jne SHOW_DATA
     	SHOW_ERROR:
 		; Show error while input text
-		SHOW_TEXT ADDR error_text, 75, 50
-    	;invoke MessageBox, hWnd, ADDR error_text, ADDR error_title_text, MB_OK
+		SHOW_TEXT OFFSET error_text, 50
     	JMP QUIT
 		
     	SHOW_DATA:
 		; Show my data
-		SHOW_TEXT ADDR student_name, 75, 50
-		SHOW_TEXT ADDR student_number, 75, 70
-		SHOW_TEXT ADDR student_date, 75, 110
-    	;invoke MessageBox, hWnd, ADDR student_data, ADDR title_text, MB_OK
+		SHOW_TEXT OFFSET student_name, 50
+		SHOW_TEXT OFFSET student_number, 70
+		SHOW_TEXT OFFSET student_date, 110
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
         RET

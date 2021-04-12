@@ -41,15 +41,15 @@ szText macro name, text:vararg
 	lbl:
 endm
 
-SHOW_TEXT macro text, x, y
+SHOW_TEXT macro text, y_ordinate
 	; Macros for showing
 	;;Show data in window interface
 	invoke CreateWindowEx,NULL,
         addr static_attr,
         text,
         WS_VISIBLE or WS_CHILD or SS_CENTER,
-        x,
-        y,
+        75,
+        y_ordinate,
         150,
         100,
         hWnd,
@@ -144,19 +144,15 @@ Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 	invoke	ShowWindow, hWnd, nShowCmd
 	invoke	UpdateWindow, hWnd
 
-PumpTheMessage:
+MessageCreating:
 	invoke GetMessage, ADDR msg, NULL, 0, 0
-
 	CMP eax, 0
-	JE PumpTheMessageEnd
-
+	JE MessageDestructing
 	invoke TranslateMessage, ADDR msg
 	invoke DispatchMessage, ADDR msg
+	JMP MessageCreating
 
-	JMP PumpTheMessage
-
-PumpTheMessageEnd:
-
+MessageDestructing:
 	MOV	eax, msg.wParam
 	RET
 
@@ -175,27 +171,13 @@ Our_WINDOW proc 	hWnd 	:dword,
                 ADDR static_attr,
                 ADDR greeting_text,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
-                0,
-                2,
-                140,
-                20,
-                hWnd,
-                0001,
-                hInstance,
-                NULL
+                0, 2, 140, 20, hWnd, 0001, hInstance, NULL
 	; Show input field for text
 		invoke CreateWindowEx,NULL,
                 ADDR edit_attr,
                 NULL,
                 WS_VISIBLE or WS_CHILD or ES_LEFT or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_BORDER,
-                140,
-                0,
-                100,
-                20,
-                hWnd,
-                0000,
-                hInstance,
-                NULL 
+                140, 0, 100, 20, hWnd, 0000, hInstance, NULL 
         MOV edit_field, eax
 	; Show button with text
         invoke CreateWindowEx,NULL,
@@ -232,15 +214,15 @@ Our_WINDOW proc 	hWnd 	:dword,
 		jne SHOW_DATA
     	SHOW_ERROR:
 		; Show error while input text
-		SHOW_TEXT ADDR error_text, 75, 50
+		SHOW_TEXT ADDR error_text, 50
     	;invoke MessageBox, hWnd, ADDR error_text, ADDR error_title_text, MB_OK
     	JMP QUIT
 		
     	SHOW_DATA:
 		; Show my data
-		SHOW_TEXT ADDR student_name, 75, 50
-		SHOW_TEXT ADDR student_number, 75, 70
-		SHOW_TEXT ADDR student_date, 75, 110
+		SHOW_TEXT ADDR student_name, 50
+		SHOW_TEXT ADDR student_number, 70
+		SHOW_TEXT ADDR student_date, 110
     	;invoke MessageBox, hWnd, ADDR student_data, ADDR title_text, MB_OK
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
