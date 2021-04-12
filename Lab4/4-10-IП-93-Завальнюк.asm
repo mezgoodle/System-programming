@@ -11,7 +11,7 @@ includelib /masm32/lib/kernel32.lib
 .data
 	; Password
 	password db "nlgc`"
-	password_length dw 5
+	length_of_password dw 5
 	KEY DB 9h
 	; Attributes variables for windows
 	static_attr db "static", 0
@@ -21,10 +21,9 @@ includelib /masm32/lib/kernel32.lib
 	student_name db "ПІБ: Завальнюк М.Є.", 0
 	student_number db "Номер залікової книги: 9312", 0
 	student_date db "Дата народження: 09.11.2001", 0
+	; Text for windows
 	greeting_text db "Введіть пароль:", 0
 	error_text db "Помилка! Перевірте введений вами пароль.", 0
-	title_text db "Дані", 0
-	error_title_text db "Помилка!", 0
 	on_button_text db "Ввести", 0
 	hInstance 		dd ?
 	lpszCmdLine		dd ?
@@ -35,6 +34,8 @@ Main_WINDOW proto :dword, :dword, :dword, :dword
 Our_WINDOW proto :dword, :dword, :dword, :dword	
 
 szText macro name, text:vararg
+	; Macros for changing text
+	;; Useless thing
 	local lbl
 	jmp	lbl
 	name db text, 0
@@ -48,14 +49,7 @@ SHOW_TEXT macro text, y_ordinate
         addr static_attr,
         text,
         WS_VISIBLE or WS_CHILD or SS_CENTER,
-        75,
-        y_ordinate,
-        150,
-        100,
-        hWnd,
-        2001,
-        hInstance,
-        NULL
+        75, y_ordinate, 150, 100, hWnd, 4483, hInstance, NULL
 endm
 
 COMPARE macro input
@@ -64,9 +58,10 @@ COMPARE macro input
 	local COMPARING
 	local QUIT
 	MOV di, -1
+	; Main part
     COMPARING:
 	INC di
-    CMP di, password_length
+    CMP di, length_of_password
 	JE QUIT
 	MOV BL, input[di]
 	MOV BH, password[di]
@@ -82,11 +77,12 @@ DECRYPT macro input
 	local DECRYPTING
 	local QUIT
 	MOV di, 0
+	; Main part
     DECRYPTING:
 	MOV dh, KEY
     XOR input[di], dh
     INC di
-    CMP di, password_length
+    CMP di, length_of_password
     JE QUIT
 	LOOP DECRYPTING
 	QUIT:
@@ -104,14 +100,15 @@ start:
 	invoke	ExitProcess, eax
 
 Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
-
+	; Our main window
 	local 	wc 	:WNDCLASSEX
 	local 	msg 	:MSG
 	local 	hWnd 	:HWND
 
+	; Set title texts with macroses
 	szText	szClassName, "Main_Window"
 	szText	szWindowTitle, "Лабораторна номер 4"
-
+	
 	MOV	wc.cbSize, sizeof WNDCLASSEX
 	MOV	wc.style, CS_HREDRAW or CS_VREDRAW or CS_BYTEALIGNWINDOW
 	MOV wc.lpfnWndProc, Our_WINDOW
@@ -145,6 +142,8 @@ Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 	invoke	UpdateWindow, hWnd
 
 MessageCreating:
+	; Create the message window
+	;; Useless thing
 	invoke GetMessage, ADDR msg, NULL, 0, 0
 	CMP eax, 0
 	JE MessageDestructing
@@ -153,17 +152,16 @@ MessageCreating:
 	JMP MessageCreating
 
 MessageDestructing:
+	; Destruct the message window
+	;; Usefull thing
 	MOV	eax, msg.wParam
 	RET
 
 Main_WINDOW endp
 
 
-Our_WINDOW proc 	hWnd 	:dword,
-		uMsg 	:dword,
-		wParam 	:dword,
-		lParam 	:dword
-
+Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
+	; Create our window
 	; Create the main window
 	.if uMsg==WM_CREATE
 	; Show greeting text
@@ -171,20 +169,20 @@ Our_WINDOW proc 	hWnd 	:dword,
                 OFFSET static_attr,
                 OFFSET greeting_text,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
-                0, 2, 140, 20, hWnd, 0001, hInstance, NULL
+                0, 2, 140, 20, hWnd, 5146, hInstance, NULL
 	; Show input field for text
 		invoke CreateWindowEx,NULL,
                 OFFSET edit_attr,
                 NULL,
                 WS_VISIBLE or WS_CHILD or ES_LEFT or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_BORDER,
-                140, 0, 100, 20, hWnd, 0000, hInstance, NULL 
+                140, 0, 100, 20, hWnd, 9273, hInstance, NULL 
         MOV edit_field, eax
 	; Show button with text
         invoke CreateWindowEx,NULL,
                 OFFSET button_attr,
                 OFFSET on_button_text,
                 WS_VISIBLE or WS_CHILD,
-				251, 0, 80, 20, hWnd, 0002, hInstance, NULL
+				251, 0, 80, 20, hWnd, 44832, hInstance, NULL
 	; Close the window
 	.elseif uMsg == WM_CLOSE
 		invoke 	PostQuitMessage, 0
@@ -192,15 +190,16 @@ Our_WINDOW proc 	hWnd 	:dword,
 		RET
 	; Main part
 	.elseif uMsg == WM_COMMAND
-    	CMP wParam, 0002
+    	CMP wParam, 44832
     	JNE QUIT
     	invoke SendMessage, edit_field, WM_GETTEXT, 40, OFFSET input_text
 		MOV di, 0
 
 		; COMPARING
 		COMPARING:
-    	CMP ax, password_length
+    	CMP ax, length_of_password
 		JNE SHOW_ERROR
+		; Call macroses
 		DECRYPT input_text
 		COMPARE input_text
 		cmp bl, 0
@@ -208,7 +207,6 @@ Our_WINDOW proc 	hWnd 	:dword,
     	SHOW_ERROR:
 		; Show error while input text
 		SHOW_TEXT OFFSET error_text, 50
-    	;invoke MessageBox, hWnd, OFFSET error_text, OFFSET error_title_text, MB_OK
     	JMP QUIT
 		
     	SHOW_DATA:
@@ -216,7 +214,6 @@ Our_WINDOW proc 	hWnd 	:dword,
 		SHOW_TEXT OFFSET student_name, 50
 		SHOW_TEXT OFFSET student_number, 70
 		SHOW_TEXT OFFSET student_date, 110
-    	;invoke MessageBox, hWnd, OFFSET student_data, OFFSET title_text, MB_OK
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
         RET
