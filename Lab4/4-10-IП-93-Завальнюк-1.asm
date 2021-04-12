@@ -152,7 +152,7 @@ Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
 
 		; COMPARING
 		COMPARING:
-    	CMP eax, length_of_password
+    	CMP ax, length_of_password
 		JNE SHOW_ERROR
 		; Call macroses
 		DECRYPT input_text
