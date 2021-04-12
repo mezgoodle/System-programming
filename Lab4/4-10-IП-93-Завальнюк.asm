@@ -134,7 +134,7 @@ Main_WINDOW proc hInst:dword, hPrevInst:dword, szCmdLine:dword, nShowCmd:dword
 
 	invoke RegisterClassEx, ADDR wc
 
-	invoke CreateWindowEx, WS_EX_APPWINDOW, ADDR szClassName, ADDR szWindowTitle,
+	invoke CreateWindowEx, WS_EX_APPWINDOW, OFFSET szClassName, OFFSET szWindowTitle,
 				WS_OVERLAPPEDWINDOW, 
 				300, 300, 360, 263, 
 				NULL, NULL, hInst, NULL
@@ -168,21 +168,21 @@ Our_WINDOW proc 	hWnd 	:dword,
 	.if uMsg==WM_CREATE
 	; Show greeting text
 		invoke CreateWindowEx,NULL,
-                ADDR static_attr,
-                ADDR greeting_text,
+                OFFSET static_attr,
+                OFFSET greeting_text,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
                 0, 2, 140, 20, hWnd, 0001, hInstance, NULL
 	; Show input field for text
 		invoke CreateWindowEx,NULL,
-                ADDR edit_attr,
+                OFFSET edit_attr,
                 NULL,
                 WS_VISIBLE or WS_CHILD or ES_LEFT or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_BORDER,
                 140, 0, 100, 20, hWnd, 0000, hInstance, NULL 
         MOV edit_field, eax
 	; Show button with text
         invoke CreateWindowEx,NULL,
-                ADDR button_attr,
-                ADDR on_button_text,
+                OFFSET button_attr,
+                OFFSET on_button_text,
                 WS_VISIBLE or WS_CHILD,
 				251,
                 0,
@@ -201,7 +201,7 @@ Our_WINDOW proc 	hWnd 	:dword,
 	.elseif uMsg == WM_COMMAND
     	CMP wParam, 0002
     	JNE QUIT
-    	invoke SendMessage, edit_field, WM_GETTEXT, 40, ADDR input_text
+    	invoke SendMessage, edit_field, WM_GETTEXT, 40, OFFSET input_text
 		MOV di, 0
 
 		; COMPARING
@@ -214,16 +214,16 @@ Our_WINDOW proc 	hWnd 	:dword,
 		jne SHOW_DATA
     	SHOW_ERROR:
 		; Show error while input text
-		SHOW_TEXT ADDR error_text, 50
-    	;invoke MessageBox, hWnd, ADDR error_text, ADDR error_title_text, MB_OK
+		SHOW_TEXT OFFSET error_text, 50
+    	;invoke MessageBox, hWnd, OFFSET error_text, OFFSET error_title_text, MB_OK
     	JMP QUIT
 		
     	SHOW_DATA:
 		; Show my data
-		SHOW_TEXT ADDR student_name, 50
-		SHOW_TEXT ADDR student_number, 70
-		SHOW_TEXT ADDR student_date, 110
-    	;invoke MessageBox, hWnd, ADDR student_data, ADDR title_text, MB_OK
+		SHOW_TEXT OFFSET student_name, 50
+		SHOW_TEXT OFFSET student_number, 70
+		SHOW_TEXT OFFSET student_date, 110
+    	;invoke MessageBox, hWnd, OFFSET student_data, OFFSET title_text, MB_OK
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
         RET
