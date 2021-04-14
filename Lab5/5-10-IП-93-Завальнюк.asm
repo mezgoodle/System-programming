@@ -2,19 +2,29 @@ INCLUDE \masm32\include\masm32rt.inc
 
 ; (c / b - 24 + a) / (2 * a * c - 1)
 calc MACRO a, b, d
-    MOV AL, 2  ; preparing multiplication
+	xor ax,ax          ; очистили регистр ax
+    MOV AL, 2    ; в al - 2
     IMUL a      ; 2 * a       -> AL
+	cbw
     IMUL d   ; 2 * a * c      -> AL
+	cbw
     DEC AL  ; 2 * a * c - 1 -> AL
+	cbw
     MOV res, AL   ; 2 * a * c - 1 -> res
-	
+	cbw
     MOV AL, 1   ; preparing multiplication
+	cbw
     IMUL d      ; 1 * с         -> AL
+	cbw
     IDIV b    ; 1 * с / b     -> AL
+	cbw
     SUB AL, 24      ; 1 * c / b - 24 -> AL
+	cbw
 	ADD AL, a   ; 1 * c / b - 24 + a
-	
+	cbw
     IDIV res ; (c / b - 24 + a) / (2 * a * c - 1) -> AL, AH = 0
+cbw
+	;cbw
 ENDM
 
 finalCalc MACRO n, buffer
@@ -102,9 +112,9 @@ ENDM
     current_buff_addr      DD 0
 
     res                    DB 0
-    a                      DB -3, -3, -3, -3, -3
-    b                      DB 2, 2, 2, 2, 2
-    d                      DB 4, 2, 4, 4, 4
+    a                      DB -3, -3, -2, -1, -3
+    b                      DB 2, 2, -2, -1, 2
+    d                      DB 4, 2, 2, 3, 4
 .code
     start:
         MOV EDI, 0
