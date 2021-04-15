@@ -98,17 +98,17 @@ printNum MACRO buffer, number
     fin:
 ENDM
 
-getExpression MACRO i, buff
-    printNum a_element, coeffs_a[i]
-    printNum b_element, coeffs_b[i]
-    printNum c_element, coeffs_c[i]
+getExpression MACRO index, buffer
+    printNum a_element, coeffs_a[index]
+    printNum b_element, coeffs_b[index]
+    printNum c_element, coeffs_c[index]
 
-    calculate_the_row coeffs_a[i], coeffs_b[i], coeffs_c[i]
+    calculate_the_row coeffs_a[index], coeffs_b[index], coeffs_c[index]
     MOV res, AL
     
     finalCalc buff_res_final, res
 
-    INVOKE wsprintf, buff, addr msg_final,
+    INVOKE wsprintf, buffer, addr msg_final,
         addr a_element,
         addr b_element,
         addr c_element,
