@@ -10,8 +10,7 @@ INCLUDE \masm32\include\masm32rt.inc
     msg_final              DB "a = %s, b = %s, c = %s, результат = %s", 0
     msg_neg_format         DB "(-%d)", 0
     msg_pos_format         DB "%d", 0
-    msg_odd_format         DB "%d", 0
-    msg_even_format        DB "%d", 0
+    msg_not_even_format    DB "%d", 0
 
     buff_last_final        DB 512 DUP (0)
     first_row              DB 064 DUP (0)
@@ -58,55 +57,55 @@ calculate_the_row MACRO a, b, c_
 	cbw
 ENDM
 
-finalCalc MACRO buffer, number
-    LOCAL odd
-    LOCAL fin
+invoke_fixed_number MACRO buffer, number
+    LOCAL NOT_EVEN
+    LOCAL QUIT
 
     MOV BL, number
 	cbw
     SAR BL, 1
 	cbw
-    JB odd
+    JB NOT_EVEN
 
-    INVOKE wsprintf, addr buffer, addr msg_even_format, BL
-    JMP fin
+    INVOKE wsprintf, addr buffer, addr msg_not_even_format, BL
+    JMP QUIT
 
-    odd:
+    NOT_EVEN:
     MOV AL, 5
 	cbw
     IMUL number
 	cbw
-    INVOKE wsprintf, addr buffer, addr msg_odd_format, AL
+    INVOKE wsprintf, addr buffer, addr msg_not_even_format, AL
     
-    fin:
+    QUIT:
 ENDM
 
-printNum MACRO buffer, number
-    LOCAL pos
-    LOCAL fin
+invoke_single_number MACRO buffer, number
+    LOCAL POSITIVE_NUMBER
+    LOCAL QUIT
     MOV     CL, number
     TEST    CL, CL
-    JNS     pos
+    JNS     POSITIVE_NUMBER
 
     NEG CL
     INVOKE wsprintf, addr buffer, addr msg_neg_format, CL
-    JMP fin
+    JMP QUIT
 
-    pos:
+    POSITIVE_NUMBER:
     INVOKE wsprintf, addr buffer, addr msg_pos_format, CL
 
-    fin:
+    QUIT:
 ENDM
 
-getExpression MACRO index, buffer
-    printNum a_element, coeffs_a[index]
-    printNum b_element, coeffs_b[index]
-    printNum c_element, coeffs_c[index]
+get_the_row MACRO buffer, index
+    invoke_single_number a_element, coeffs_a[index]
+    invoke_single_number b_element, coeffs_b[index]
+    invoke_single_number c_element, coeffs_c[index]
 
     calculate_the_row coeffs_a[index], coeffs_b[index], coeffs_c[index]
     MOV res, AL
     
-    finalCalc buff_res_final, res
+    invoke_fixed_number buff_res_final, res
 
     INVOKE wsprintf, buffer, addr msg_final,
         addr a_element,
@@ -121,13 +120,13 @@ ENDM
         MOV EDI, 0
         MOV current_buff_addr, offset first_row
 
-        hereWeGoAgain:
-        getExpression EDI, current_buff_addr
+        calculation:
+        get_the_row current_buff_addr, EDI
 
         ADD current_buff_addr, 64
         INC EDI
         CMP EDI, 5
-        JB hereWeGoAgain
+        JNE calculation
 
         INVOKE wsprintf, addr buff_last_final, addr msg_last_final,
             addr first_row,
