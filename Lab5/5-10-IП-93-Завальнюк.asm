@@ -32,7 +32,9 @@ finalCalc MACRO n, buffer
     LOCAL fin
 
     MOV BL, n
+	cbw
     SAR BL, 1
+	cbw
     JB odd
 
     INVOKE wsprintf, addr buffer, addr msg_even_format, BL
@@ -40,7 +42,9 @@ finalCalc MACRO n, buffer
 
     odd:
     MOV AL, 5
+	cbw
     IMUL n
+	cbw
     INVOKE wsprintf, addr buffer, addr msg_odd_format, AL
     
     fin:
@@ -64,13 +68,12 @@ printNum MACRO n, buffer
 ENDM
 
 getExpression MACRO i, buff
-    printNum a[i], a_element
-    printNum b[i], b_element
-    printNum d[i], c_element
+    printNum coeffs_a[i], a_element
+    printNum coeffs_b[i], b_element
+    printNum coeffs_c[i], c_element
 
-    calc a[i], b[i], d[i]
+    calc coeffs_a[i], coeffs_b[i], coeffs_c[i]
     MOV res, AL
-    ;printNum AL, buff_res
     
     finalCalc res, buff_res_final
 
@@ -95,22 +98,22 @@ ENDM
     msg_even_format        DB "%d", 0
 
     buff_last_final        DB 512 DUP (0)
-    first_row             DB 064 DUP (0)
-    second_row           DB 064 DUP (0)
-    third_row           DB 064 DUP (0)
-    fourth_row           DB 064 DUP (0)
-    fifth_row           DB 064 DUP (0)
-    a_element                 DB 008 DUP (0)
-    b_element                 DB 008 DUP (0)
-    c_element                 DB 008 DUP (0)
+    first_row              DB 064 DUP (0)
+    second_row             DB 064 DUP (0)
+    third_row              DB 064 DUP (0)
+    fourth_row             DB 064 DUP (0)
+    fifth_row              DB 064 DUP (0)
+    a_element              DB 008 DUP (0)
+    b_element              DB 008 DUP (0)
+    c_element              DB 008 DUP (0)
     buff_res               DB 008 DUP (0)
     buff_res_final         DB 016 DUP (0)
     current_buff_addr      DD 0
 
     res                    DB 0
-    a                      DB -3, -3, -2, -1, -3
-    b                      DB 2, 2, -2, -1, 2
-    d                      DB 4, 2, 2, 3, 4
+    coeffs_a                      DB -3, -3, -2, -1, 3
+    coeffs_b                      DB 2, 2, -2, -1, -2
+    coeffs_c                      DB 4, 2, 2, 3, 4
 .code
     start:
         MOV EDI, 0
