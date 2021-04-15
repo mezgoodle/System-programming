@@ -2,13 +2,9 @@ INCLUDE \masm32\include\masm32rt.inc
 
 .data
     msg_title       DB "Лабораторна робота 5", 0
-    msg_last_final  DB "1. %s", 10,
-        "2. %s", 10,
-        "3. %s", 10,
-        "4. %s", 10,
-        "5. %s", 0
+    msg_last_final  DB "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
     msg_final              DB "a = %s, b = %s, c = %s, результат = %s", 0
-    msg_neg_format         DB "(-%d)", 0
+    msg_neg_format         DB "-%d", 0
     msg_pos_format         DB "%d", 0
     msg_not_even_format    DB "%d", 0
 
@@ -128,12 +124,7 @@ ENDM
         CMP EDI, 5
         JNE calculation
 
-        INVOKE wsprintf, addr buff_last_final, addr msg_last_final,
-            addr first_row,
-            addr second_row,
-            addr third_row,
-            addr fourth_row,
-            addr fifth_row
+        INVOKE wsprintf, addr buff_last_final, addr msg_last_final, addr first_row, addr second_row, addr third_row, addr fourth_row, addr fifth_row
 
         INVOKE MessageBox, 0, addr buff_last_final, addr msg_title, MB_OK
         INVOKE ExitProcess, 0
