@@ -4,74 +4,62 @@ INCLUDE \masm32\include\masm32rt.inc
     msg_title       DB "Лабораторна робота 5", 0
     msg_last_final  DB "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
     msg_final              DB "a = %s, b = %s, c = %s, результат = %s", 0
-    msg_neg_format         DB "-%d", 0
-    msg_pos_format         DB "%d", 0
-    msg_not_even_format    DB "%d", 0
+    msg_neg_format         DB "-%i", 0
+    msg_pos_format         DB "%i", 0
 
-    buff_last_final        DB 512 DUP (0)
-    first_row              DB 064 DUP (0)
-    second_row             DB 064 DUP (0)
-    third_row              DB 064 DUP (0)
-    fourth_row             DB 064 DUP (0)
-    fifth_row              DB 064 DUP (0)
-    a_element              DB 008 DUP (0)
-    b_element              DB 008 DUP (0)
-    c_element              DB 008 DUP (0)
-    buff_res               DB 008 DUP (0)
-    buff_res_final         DB 016 DUP (0)
     current_buff_addr      DD 0
 
     res                    DB 0
     coeffs_a               DB -3, -3, -2, -1, 3
-    coeffs_b               DB 2, 2, -2, -1, -2
+    coeffs_b               DB 2, 2, -2, -1, 2
     coeffs_c               DB 4, 2, 2, 3, 4
+	
+.data?
+    a_element              DB 16 DUP (?)
+    b_element              DB 16 DUP (?)
+    c_element              DB 16 DUP (?)
+	buff_last_final        DB 1024 DUP (?)
+	buff_res_final         DB 32 DUP (?)
+    first_row              DB 128 DUP (?)
+    second_row             DB 128 DUP (?)
+    third_row              DB 128 DUP (?)
+    fourth_row             DB 128 DUP (?)
+    fifth_row              DB 128 DUP (?)
+    buff_res               DB 16 DUP (?)
+    
 
 ; (c / b - 24 + a) / (2 * a * c - 1)
 calculate_the_row MACRO a, b, c_
-	xor ax,ax
     MOV AL, 1
 	INC AL
     IMUL a
-	cbw
     IMUL c_
-	cbw
     DEC AL
-	cbw
     MOV res, AL
-	cbw
     MOV AL, 1
-	cbw
     IMUL c_
-	cbw
     IDIV b
-	cbw
 	ADD AL, a
-	cbw
     SUB AL, 24
 	cbw
     IDIV res
-	cbw
 ENDM
 
 invoke_fixed_number MACRO buffer, number
     LOCAL NOT_EVEN
     LOCAL QUIT
 
-    MOV BL, number
-	cbw
-    SAR BL, 1
-	cbw
+    MOV AL, number
+    SAR AL, 1
     JB NOT_EVEN
 
-    INVOKE wsprintf, addr buffer, addr msg_not_even_format, BL
+    INVOKE wsprintf, addr buffer, addr msg_pos_format, AL
     JMP QUIT
 
     NOT_EVEN:
     MOV AL, 5
-	cbw
     IMUL number
-	cbw
-    INVOKE wsprintf, addr buffer, addr msg_not_even_format, AL
+    INVOKE wsprintf, addr buffer, addr msg_pos_format, AL
     
     QUIT:
 ENDM
@@ -79,17 +67,16 @@ ENDM
 invoke_single_number MACRO buffer, number
     LOCAL POSITIVE_NUMBER
     LOCAL QUIT
-    MOV     CL, number
-    TEST    CL, CL
+	MOV CL, -1
+    MOV     AL, number
+    TEST    AL, AL
     JNS     POSITIVE_NUMBER
-
-    NEG CL
-    INVOKE wsprintf, addr buffer, addr msg_neg_format, CL
+	cbw
+    IMUL CL
+    INVOKE wsprintf, addr buffer, addr msg_neg_format, AL
     JMP QUIT
-
     POSITIVE_NUMBER:
-    INVOKE wsprintf, addr buffer, addr msg_pos_format, CL
-
+    INVOKE wsprintf, addr buffer, addr msg_pos_format, AL
     QUIT:
 ENDM
 
@@ -103,11 +90,7 @@ get_the_row MACRO buffer, index
     
     invoke_fixed_number buff_res_final, res
 
-    INVOKE wsprintf, buffer, addr msg_final,
-        addr a_element,
-        addr b_element,
-        addr c_element,
-        addr buff_res_final
+    INVOKE wsprintf, buffer, addr msg_final, addr a_element, addr b_element, addr c_element, addr buff_res_final
 ENDM
 
 
@@ -119,7 +102,7 @@ ENDM
         calculation:
         get_the_row current_buff_addr, EDI
 
-        ADD current_buff_addr, 64
+        ADD current_buff_addr, 128
         INC EDI
         CMP EDI, 5
         JNE calculation
