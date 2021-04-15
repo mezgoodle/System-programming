@@ -2,8 +2,8 @@ INCLUDE \masm32\include\masm32rt.inc
 
 ; (c / b - 24 + a) / (2 * a * c - 1)
 calc MACRO a, b, d
-	xor ax,ax          ; î÷èñòèëè ðåãèñòð ax
-    MOV AL, 2    ; â al - 2
+	xor ax,ax          ; Ð¾Ñ‡Ð¸ÑÑ‚Ð¸Ð»Ð¸ Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€ ax
+    MOV AL, 2    ; Ð² al - 2
     IMUL a      ; 2 * a       -> AL
 	cbw
     IMUL d   ; 2 * a * c      -> AL
@@ -14,9 +14,9 @@ calc MACRO a, b, d
 	cbw
     MOV AL, 1   ; preparing multiplication
 	cbw
-    IMUL d      ; 1 * ñ         -> AL
+    IMUL d      ; 1 * Ñ         -> AL
 	cbw
-    IDIV b    ; 1 * ñ / b     -> AL
+    IDIV b    ; 1 * Ñ / b     -> AL
 	cbw
     SUB AL, 24      ; 1 * c / b - 24 -> AL
 	cbw
@@ -46,66 +46,34 @@ finalCalc MACRO n, buffer
     fin:
 ENDM
 
-printNum MACRO n, buffer
-    LOCAL pos
-    LOCAL fin
-    MOV     CL, n
-    TEST    CL, CL
-    JNS     pos
-
-    NEG CL
-    INVOKE wsprintf, addr buffer, addr msg_neg_format, CL
-    JMP fin
-
-    pos:
-    INVOKE wsprintf, addr buffer, addr msg_pos_format, CL
-
-    fin:
-ENDM
 
 getExpression MACRO i, buff
-    printNum a[i], a_element
-    printNum b[i], b_element
-    printNum d[i], c_element
-
     calc a[i], b[i], d[i]
     MOV res, AL
-    printNum AL, buff_res
-    
     finalCalc res, buff_res_final
-
-    INVOKE wsprintf, buff, addr msg_final,
-        addr b_element,
-        addr c_element,
-        addr a_element,
-        addr a_element,
-        addr c_element,
-        addr buff_res,
-        addr buff_res_final
+	INVOKE wsprintf, buff, addr buff_res_final
 ENDM
 
 .data
-    msg_title       DB "Ëàáîðàòîðíà ðîáîòà 5", 0
-    msg_last_final  DB "1. %s", 10,
+    msg_title       DB "Ð‹Ð°Ð±Ð¾Ñ€Ð°Ñ‚Ð¾Ñ€Ð½Ð° Ñ€Ð¾Ð±Ð¾Ñ‚Ð° 5", 0
+    msg_last_final  DB "â€“ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¸ Ð¾Ð±Ñ‡Ð¸ÑÐ»ÐµÐ½ÑŒ:", 10,
+        "1. %s", 10,
         "2. %s", 10,
         "3. %s", 10,
         "4. %s", 10,
         "5. %s", 0
-    msg_final              DB "(%s / %s - 24 + %s) / (2 * %s * %s - 1) = %s -> %s", 0
-    msg_neg_format         DB "(-%d)", 0
-    msg_pos_format         DB "%d", 0
-    msg_odd_format         DB "* 5 = %d", 0
-    msg_even_format        DB "/ 2 = %d", 0
+    msg_odd_format         DB "%d", 0
+    msg_even_format        DB "%d", 0
 
     buff_last_final        DB 512 DUP (0)
-    first_row             DB 064 DUP (0)
-    second_row           DB 064 DUP (0)
-    third_row           DB 064 DUP (0)
-    fourth_row           DB 064 DUP (0)
-    fifth_row           DB 064 DUP (0)
-    a_element                 DB 008 DUP (0)
-    b_element                 DB 008 DUP (0)
-    c_element                 DB 008 DUP (0)
+    buff_final_1           DB 064 DUP (0)
+    buff_final_2           DB 064 DUP (0)
+    buff_final_3           DB 064 DUP (0)
+    buff_final_4           DB 064 DUP (0)
+    buff_final_5           DB 064 DUP (0)
+    buff_a                 DB 008 DUP (0)
+    buff_b                 DB 008 DUP (0)
+    buff_d                 DB 008 DUP (0)
     buff_res               DB 008 DUP (0)
     buff_res_final         DB 016 DUP (0)
     current_buff_addr      DD 0
@@ -117,7 +85,7 @@ ENDM
 .code
     start:
         MOV EDI, 0
-        MOV current_buff_addr, offset first_row
+        MOV current_buff_addr, offset buff_final_1
 
         hereWeGoAgain:
         getExpression EDI, current_buff_addr
@@ -128,11 +96,11 @@ ENDM
         JB hereWeGoAgain
 
         INVOKE wsprintf, addr buff_last_final, addr msg_last_final,
-            addr first_row,
-            addr second_row,
-            addr third_row,
-            addr fourth_row,
-            addr fifth_row
+            addr buff_final_1,
+            addr buff_final_2,
+            addr buff_final_3,
+            addr buff_final_4,
+            addr buff_final_5
 
         INVOKE MessageBox, 0, addr buff_last_final, addr msg_title, MB_OK
         INVOKE ExitProcess, 0
