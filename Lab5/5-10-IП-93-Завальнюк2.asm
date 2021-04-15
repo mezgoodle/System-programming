@@ -53,7 +53,7 @@ printNum MACRO n, buffer
     TEST    CL, CL
     JNS     pos
 
-    NEG CL
+    IMUL -1
     INVOKE wsprintf, addr buffer, addr msg_neg_format, CL
     JMP fin
 
