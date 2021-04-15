@@ -1,4 +1,14 @@
-INCLUDE \masm32\include\masm32rt.inc
+.386
+.model flat, stdcall
+option CaseMap:None
+
+include /masm32/include/windows.inc
+includelib /masm32/lib/kernel32.lib
+include /masm32/include/user32.inc
+includelib /masm32/lib/user32.lib
+include /masm32/include/kernel32.inc
+
+
 
 .data
     msg_title       DB "Лабораторна робота 5", 0
@@ -13,6 +23,7 @@ INCLUDE \masm32\include\masm32rt.inc
     coeffs_a               DB -3, -3, -2, -1, 3
     coeffs_b               DB 2, 2, -2, -1, 2
     coeffs_c               DB 4, 2, 2, 3, 4
+	rows				   DD 5
 	
 .data?
     a_element              DB 16 DUP (?)
@@ -46,37 +57,41 @@ calculate_the_row MACRO a, b, c_
 ENDM
 
 invoke_fixed_number MACRO buffer, number
-    LOCAL NOT_EVEN
     LOCAL QUIT
+	LOCAL NOT_EVEN
 
     MOV AL, number
     SAR AL, 1
     JB NOT_EVEN
 
-    INVOKE wsprintf, addr buffer, addr msg_pos_format, AL
+    INVOKE wsprintf, addr buffer, 
+					 addr msg_pos_format, AL
     JMP QUIT
 
     NOT_EVEN:
     MOV AL, 5
     IMUL number
-    INVOKE wsprintf, addr buffer, addr msg_pos_format, AL
+    INVOKE wsprintf, addr buffer, 
+					 addr msg_pos_format, AL
     
     QUIT:
 ENDM
 
 invoke_single_number MACRO buffer, number
-    LOCAL POSITIVE_NUMBER
     LOCAL QUIT
+	LOCAL POSITIVE_NUMBER
 	MOV CL, -1
     MOV     AL, number
     TEST    AL, AL
     JNS     POSITIVE_NUMBER
 	cbw
     IMUL CL
-    INVOKE wsprintf, addr buffer, addr msg_neg_format, AL
+    INVOKE wsprintf, addr buffer, 
+					 addr msg_neg_format, AL
     JMP QUIT
     POSITIVE_NUMBER:
-    INVOKE wsprintf, addr buffer, addr msg_pos_format, AL
+    INVOKE wsprintf, addr buffer, 
+					 addr msg_pos_format, AL
     QUIT:
 ENDM
 
@@ -96,15 +111,15 @@ ENDM
 
 .code
     start:
-        MOV EDI, 0
+        
         MOV current_buff_addr, offset first_row
-
+		MOV EDI, 0
         calculation:
         get_the_row current_buff_addr, EDI
 
         ADD current_buff_addr, 128
-        INC EDI
-        CMP EDI, 5
+        ADD EDI, 1
+        CMP EDI, rows
         JNE calculation
 
         INVOKE wsprintf, addr buff_last_final, addr msg_last_final, addr first_row, addr second_row, addr third_row, addr fourth_row, addr fifth_row
