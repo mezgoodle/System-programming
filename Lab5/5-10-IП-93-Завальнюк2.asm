@@ -46,12 +46,37 @@ finalCalc MACRO n, buffer
     fin:
 ENDM
 
+printNum MACRO n, buffer
+    LOCAL pos
+    LOCAL fin
+    MOV     CL, n
+    TEST    CL, CL
+    JNS     pos
+
+    NEG CL
+    INVOKE wsprintf, addr buffer, addr msg_neg_format, CL
+    JMP fin
+
+    pos:
+    INVOKE wsprintf, addr buffer, addr msg_pos_format, CL
+
+    fin:
+ENDM
+
+
 
 getExpression MACRO i, buff
+    printNum a[i], a_element
+    printNum b[i], b_element
+    printNum d[i], c_element
     calc a[i], b[i], d[i]
     MOV res, AL
     finalCalc res, buff_res_final
-	INVOKE wsprintf, buff, addr buff_res_final
+	INVOKE wsprintf, buff, addr row,
+		addr a_element,
+		addr b_element,
+		addr c_element,
+		addr buff_res_final
 ENDM
 
 .data
@@ -64,6 +89,7 @@ ENDM
         "5. %s", 0
     msg_odd_format         DB "%d", 0
     msg_even_format        DB "%d", 0
+	row					   DB "a = %s, b = %s, c = %s, результат = %s", 0
 
     buff_last_final        DB 512 DUP (0)
     buff_final_1           DB 064 DUP (0)

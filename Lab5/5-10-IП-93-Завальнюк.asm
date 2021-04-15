@@ -70,17 +70,14 @@ getExpression MACRO i, buff
 
     calc a[i], b[i], d[i]
     MOV res, AL
-    printNum AL, buff_res
+    ;printNum AL, buff_res
     
     finalCalc res, buff_res_final
 
     INVOKE wsprintf, buff, addr msg_final,
+        addr a_element,
         addr b_element,
         addr c_element,
-        addr a_element,
-        addr a_element,
-        addr c_element,
-        addr buff_res,
         addr buff_res_final
 ENDM
 
@@ -91,11 +88,11 @@ ENDM
         "3. %s", 10,
         "4. %s", 10,
         "5. %s", 0
-    msg_final              DB "(%s / %s - 24 + %s) / (2 * %s * %s - 1) = %s -> %s", 0
+    msg_final              DB "a = %s, b = %s, c = %s, результат = %s", 0
     msg_neg_format         DB "(-%d)", 0
     msg_pos_format         DB "%d", 0
-    msg_odd_format         DB "* 5 = %d", 0
-    msg_even_format        DB "/ 2 = %d", 0
+    msg_odd_format         DB "%d", 0
+    msg_even_format        DB "%d", 0
 
     buff_last_final        DB 512 DUP (0)
     first_row             DB 064 DUP (0)
