@@ -34,27 +34,27 @@ include /masm32/include/kernel32.inc
     fifthRow              DB 128 DUP (?)
 	rowShowing       	   DB 32 DUP (?)
 
-calculateTheRow MACRO a, b, c_
-    MOV AL, 1
-	INC AL
-    IMUL a
-    IMUL c_
-    DEC AL
-    MOV calculation, AL
-    MOV AL, 1
-    IMUL c_
-    IDIV b
-	ADD AL, a
-    SUB AL, 24
+calculateTheRow macro A, B, C_
+    mov AL, 1
+	add AL, 1
+    imul A
+    imul C_
+	add AL, -1
+    mov calculation, AL
+    mov AL, 1
+    imul C_
+    idiv B
+	add AL, A
+    sub AL, 24
 	cbw
-    IDIV calculation
+    idiv calculation
 ENDM
 
-invokeFixedNumber MACRO buffer, number
+invokeFixedNumber macro buffer, number
     LOCAL QUIT
 	LOCAL NOT_EVEN
 
-    MOV AL, number
+    mov AL, number
     SAR AL, 1
     JB NOT_EVEN
 
@@ -63,23 +63,23 @@ invokeFixedNumber MACRO buffer, number
     JMP QUIT
 
     NOT_EVEN:
-    MOV AL, 5
-    IMUL number
+    mov AL, 5
+    imul number
     INVOKE wsprintf, addr buffer, 
 					 addr textOfPossitiveNumber, AL
     
     QUIT:
 ENDM
 
-invokeSingleNumber MACRO buffer, number
+invokeSingleNumber macro buffer, number
     LOCAL QUIT
 	LOCAL POSITIVE_NUMBER
-	MOV CL, -1
-    MOV     AL, number
+	mov CL, -1
+    mov     AL, number
     TEST    AL, AL
     JNS     POSITIVE_NUMBER
 	cbw
-    IMUL CL
+    imul CL
     INVOKE wsprintf, addr buffer, 
 					 addr textOfNegativeNumber, AL
     JMP QUIT
@@ -89,13 +89,13 @@ invokeSingleNumber MACRO buffer, number
     QUIT:
 ENDM
 
-get_the_row MACRO buffer, index
+get_the_row macro buffer, index
     invokeSingleNumber aElement, coeffsA[index]
     invokeSingleNumber bElement, coeffsB[index]
     invokeSingleNumber cElement, coeffsC[index]
 
     calculateTheRow coeffsA[index], coeffsB[index], coeffsC[index]
-    MOV calculation, AL
+    mov calculation, AL
     
     invokeFixedNumber rowShowing, calculation
 
@@ -106,13 +106,13 @@ ENDM
 .code
     start:
         
-        MOV stepWithBuffer, offset firstRow
-		MOV EDI, 0
+        mov stepWithBuffer, offset firstRow
+		mov EDI, 0
         calculation_loop:
         get_the_row stepWithBuffer, EDI
 
-        ADD stepWithBuffer, 128
-        ADD EDI, 1
+        add stepWithBuffer, 128
+        add EDI, 1
         CMP EDI, rows
         JNE calculation_loop
 
