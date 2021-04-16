@@ -11,24 +11,24 @@ includelib /masm32/lib/kernel32.lib
 .data
 	; Attributes variables for windows
 	attributeOne db "static", 0
-	attributeDva db "edit", 0
-    attributeThree db "button", 0
 	; Text variables
-	student_name db "ПІБ: Завальнюк М.Є.", 0
-	student_number db "Номер залікової книги: 9312", 0
-	student_date db "Дата народження: 09.11.2001", 0
+	myName db "ПІБ: Завальнюк М.Є.", 0
+	someDigit db "Номер залікової книги: 9312", 0
+	goodDay db "Дата народження: 09.11.2001", 0
+	attributeDva db "edit", 0
 	; Password
 	password_array db "nlgc`"
-	length_of_password dw 5
+	santimeteres dw 5
 	generatedKey DB 9h
 	; Text for windows
-	greeting_text db "Введіть пароль:", 0
-	error_text db "Помилка! Перевірте введений вами пароль.", 0
-	on_button_text db "Ввести", 0
 	hInstance 		dd ?
 	lpszCmdLine		dd ?
 	edit_field 		HWND ?
 	input_text db 64 DUP (?)
+	neutralText db "Введіть пароль:", 0
+	badText db "Помилка! Перевірте введений вами пароль.", 0
+	on_button_text db "Ввести", 0
+	attributeThree db "button", 0
 
 Main_WINDOW proto :dword, :dword, :dword, :dword
 Our_WINDOW proto :dword, :dword, :dword, :dword	
@@ -60,7 +60,7 @@ macrosConditional macro symbols
 	; Main part
     motorcycle:
 	INC di
-    CMP di, length_of_password
+    CMP di, santimeteres
 	JE quit
 	MOV BL, symbols[di]
 	MOV BH, password_array[di]
@@ -81,7 +81,7 @@ macrosDeshifr macro symbols
 	MOV dh, generatedKey
     XOR symbols[di], dh
     INC di
-    CMP di, length_of_password
+    CMP di, santimeteres
     JE quit
 	LOOP decrypting
 	quit:
@@ -166,7 +166,7 @@ Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
 	; Show greeting text
 		invoke CreateWindowEx,NULL,
                 OFFSET attributeOne,
-                OFFSET greeting_text,
+                OFFSET neutralText,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
                 0, 2, 140, 20, hWnd, 5146, hInstance, NULL
 	; Show input field for text
@@ -190,34 +190,34 @@ Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
 	; Main part
 	.elseif uMsg == WM_COMMAND
     	CMP wParam, 44832
-    	JNE QUIT
+    	JNE finishing
     	invoke SendMessage, edit_field, WM_GETTEXT, 40, OFFSET input_text
 		MOV edi, 0
 
 		; COMPARING
-		COMPARING:
-    	CMP ax, length_of_password
+		motorcycling:
+    	CMP ax, santimeteres
 		JNE erroring
 		; Call macroses
 		macrosDeshifr input_text
 		macrosConditional input_text
 		cmp bl, 0
-		jne SHOW_DATA
+		jne printing
     	erroring:
 		; Show error while input text
-		invokeTexting OFFSET error_text, 50
-    	JMP QUIT
+		invokeTexting OFFSET badText, 50
+    	JMP finishing
 		
-    	SHOW_DATA:
+    	printing:
 		; Show my data
-		invokeTexting OFFSET student_name, 50
-		invokeTexting OFFSET student_number, 70
-		invokeTexting OFFSET student_date, 110
+		invokeTexting OFFSET myName, 50
+		invokeTexting OFFSET someDigit, 70
+		invokeTexting OFFSET goodDay, 110
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
         RET
 	.endif
-		QUIT:
+		finishing:
     	XOR eax, eax
     	RET
 Our_WINDOW endp

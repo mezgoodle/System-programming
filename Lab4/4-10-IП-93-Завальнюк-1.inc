@@ -1,45 +1,45 @@
-SHOW_TEXT macro text, y_ordinate
+macrosDeshifr macro symbols
+	local quit
+	; Macros for decrypting
+	;; Decrypting the input text
+	local decrypting
+	MOV di, 0
+	; Main part
+    decrypting:
+	MOV dh, generatedKey
+    XOR symbols[di], dh
+    INC di
+    CMP di, santimeteres
+    JE quit
+	LOOP decrypting
+	quit:
+endm
+
+invokeTexting macro text, y_ordinate
 	; Macros for showing
 	;;Show data in window interface
 	invoke CreateWindowEx,NULL,
-        addr static_attr,
+        addr attributeOne,
         text,
-        WS_VISIBLE or WS_CHILD or SS_CENTER,
-        75, y_ordinate, 150, 100, hWnd, 4483, hInstance, NULL
+        WS_VISIBLE or WS_CHILD or SS_CENTER, 75, y_ordinate, 150, 100, hWnd, 4483, hInstance, NULL
 endm
 
-COMPARE macro input
+macrosConditional macro symbols
+	local motorcycle
 	; Macros for comparing
 	;;Comparing the input text and password
-	local COMPARING
-	local QUIT
+	local quit
 	MOV di, -1
 	; Main part
-    COMPARING:
+    motorcycle:
 	INC di
-    CMP di, length_of_password
-	JE QUIT
-	MOV BL, input[di]
-	MOV BH, password[di]
+    CMP di, santimeteres
+	JE quit
+	MOV BL, symbols[di]
+	MOV BH, password_array[di]
     CMP BL, BH
-    JNE SHOW_ERROR
-	LOOP COMPARING
-	QUIT:
+    JNE erroring
+	LOOP motorcycle
+	quit:
 endm
 
-DECRYPT macro input
-	; Macros for decrypting
-	;; Decrypting the input text
-	local DECRYPTING
-	local QUIT
-	MOV di, 0
-	; Main part
-    DECRYPTING:
-	MOV dh, KEY
-    XOR input[di], dh
-    INC di
-    CMP di, length_of_password
-    JE QUIT
-	LOOP DECRYPTING
-	QUIT:
-endm
