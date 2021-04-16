@@ -50,25 +50,25 @@ calculateTheRow macro A, B, C_
     idiv calculation
 endm
 
-invokeFixedNumber macro buffer, number
+invokeFixedNumber macro place, number
     local quit
 	local notEven
     mov AL, number
     sar AL, 1
     jb notEven
-    invoke wsprintf, addr buffer, 
+    invoke wsprintf, addr place, 
 					 addr textOfPossitiveNumber, AL
     jmp quit
     notEven:
     mov AL, 5
     imul number
-    invoke wsprintf, addr buffer, 
+    invoke wsprintf, addr place, 
 					 addr textOfPossitiveNumber, AL
     
     quit:
 endm
 
-invokeSingleNumber macro buffer, number
+invokeSingleNumber macro place, number
     local quit
 	local positiveNumber
 	mov CL, -1
@@ -77,44 +77,36 @@ invokeSingleNumber macro buffer, number
     jns     positiveNumber
 	cbw
     imul CL
-    invoke wsprintf, addr buffer, 
+    invoke wsprintf, addr place, 
 					 addr textOfNegativeNumber, AL
     jmp quit
     positiveNumber:
-    invoke wsprintf, addr buffer, 
+    invoke wsprintf, addr place, 
 					 addr textOfPossitiveNumber, AL
     quit:
 endm
 
-getTheRow macro buffer, index
+getTheRow macro place, index
     invokeSingleNumber aElement, coeffsA[index]
     invokeSingleNumber bElement, coeffsB[index]
     invokeSingleNumber cElement, coeffsC[index]
-
     calculateTheRow coeffsA[index], coeffsB[index], coeffsC[index]
     mov calculation, AL
-    
     invokeFixedNumber rowShowing, calculation
-
-    invoke wsprintf, buffer, addr textOfRow, addr aElement, addr bElement, addr cElement, addr rowShowing
+    invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr rowShowing
 endm
-
 
 .code
     start:
-        
         mov stepWithBuffer, offset firstRow
 		mov EDI, 0
         calculationLoop:
         getTheRow stepWithBuffer, EDI
-
         add stepWithBuffer, 128
         add EDI, 1
         CMP EDI, rows
         JNE calculationLoop
-
         invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
-
         invoke MessageBox, 0, addr endShowing, addr textOfWindow, MB_OK
         invoke ExitProcess, 0
     end start
