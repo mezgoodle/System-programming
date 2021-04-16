@@ -45,7 +45,7 @@ calculateTheRow macro A, B, C_
     imul C_
     idiv B
 	add AL, A
-    sub AL, 24
+    add AL, -24
 	cbw
     idiv calculation
 endm
@@ -60,8 +60,9 @@ invokeFixedNumber macro place, number
 					 addr textOfPossitiveNumber, AL
     jmp quit
     notEven:
-    mov AL, 5
-    imul number
+    mov BL, 5
+    mov AL, number
+    imul BL
     invoke wsprintf, addr place, 
 					 addr textOfPossitiveNumber, AL
     
