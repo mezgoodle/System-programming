@@ -9,18 +9,18 @@ includelib /masm32/lib/user32.lib
 includelib /masm32/lib/kernel32.lib
 
 .data
-	; Password
-	password db "nlgc`"
-	length_of_password dw 5
-	KEY DB 9h
 	; Attributes variables for windows
-	static_attr db "static", 0
-	edit_attr db "edit", 0
-    button_attr db "button", 0
+	attributeOne db "static", 0
+	attributeDva db "edit", 0
+    attributeThree db "button", 0
 	; Text variables
 	student_name db "ПІБ: Завальнюк М.Є.", 0
 	student_number db "Номер залікової книги: 9312", 0
 	student_date db "Дата народження: 09.11.2001", 0
+	; Password
+	password_array db "nlgc`"
+	length_of_password dw 5
+	generatedKey DB 9h
 	; Text for windows
 	greeting_text db "Введіть пароль:", 0
 	error_text db "Помилка! Перевірте введений вами пароль.", 0
@@ -42,50 +42,49 @@ szText macro name, text:vararg
 	lbl:
 endm
 
-SHOW_TEXT macro text, y_ordinate
+invokeTexting macro text, y_ordinate
 	; Macros for showing
 	;;Show data in window interface
 	invoke CreateWindowEx,NULL,
-        addr static_attr,
+        addr attributeOne,
         text,
-        WS_VISIBLE or WS_CHILD or SS_CENTER,
-        75, y_ordinate, 150, 100, hWnd, 4483, hInstance, NULL
+        WS_VISIBLE or WS_CHILD or SS_CENTER, 75, y_ordinate, 150, 100, hWnd, 4483, hInstance, NULL
 endm
 
-COMPARE macro input
+macrosConditional macro symbols
+	local motorcycle
 	; Macros for comparing
 	;;Comparing the input text and password
-	local COMPARING
-	local QUIT
+	local quit
 	MOV di, -1
 	; Main part
-    COMPARING:
+    motorcycle:
 	INC di
     CMP di, length_of_password
-	JE QUIT
-	MOV BL, input[di]
-	MOV BH, password[di]
+	JE quit
+	MOV BL, symbols[di]
+	MOV BH, password_array[di]
     CMP BL, BH
-    JNE SHOW_ERROR
-	LOOP COMPARING
-	QUIT:
+    JNE erroring
+	LOOP motorcycle
+	quit:
 endm
 
-DECRYPT macro input
+macrosDeshifr macro symbols
+	local quit
 	; Macros for decrypting
 	;; Decrypting the input text
-	local DECRYPTING
-	local QUIT
+	local decrypting
 	MOV di, 0
 	; Main part
-    DECRYPTING:
-	MOV dh, KEY
-    XOR input[di], dh
+    decrypting:
+	MOV dh, generatedKey
+    XOR symbols[di], dh
     INC di
     CMP di, length_of_password
-    JE QUIT
-	LOOP DECRYPTING
-	QUIT:
+    JE quit
+	LOOP decrypting
+	quit:
 endm
 
 .code
@@ -166,20 +165,20 @@ Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
 	.if uMsg==WM_CREATE
 	; Show greeting text
 		invoke CreateWindowEx,NULL,
-                OFFSET static_attr,
+                OFFSET attributeOne,
                 OFFSET greeting_text,
                 WS_VISIBLE or WS_CHILD or SS_CENTER,
                 0, 2, 140, 20, hWnd, 5146, hInstance, NULL
 	; Show input field for text
 		invoke CreateWindowEx,NULL,
-                OFFSET edit_attr,
+                OFFSET attributeDva,
                 NULL,
                 WS_VISIBLE or WS_CHILD or ES_LEFT or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_BORDER,
                 140, 0, 100, 20, hWnd, 9273, hInstance, NULL 
         MOV edit_field, eax
 	; Show button with text
         invoke CreateWindowEx,NULL,
-                OFFSET button_attr,
+                OFFSET attributeThree,
                 OFFSET on_button_text,
                 WS_VISIBLE or WS_CHILD,
 				251, 0, 80, 20, hWnd, 44832, hInstance, NULL
@@ -198,22 +197,22 @@ Our_WINDOW proc hWnd: dword, uMsg: dword, wParam: dword, lParam: dword
 		; COMPARING
 		COMPARING:
     	CMP ax, length_of_password
-		JNE SHOW_ERROR
+		JNE erroring
 		; Call macroses
-		DECRYPT input_text
-		COMPARE input_text
+		macrosDeshifr input_text
+		macrosConditional input_text
 		cmp bl, 0
 		jne SHOW_DATA
-    	SHOW_ERROR:
+    	erroring:
 		; Show error while input text
-		SHOW_TEXT OFFSET error_text, 50
+		invokeTexting OFFSET error_text, 50
     	JMP QUIT
 		
     	SHOW_DATA:
 		; Show my data
-		SHOW_TEXT OFFSET student_name, 50
-		SHOW_TEXT OFFSET student_number, 70
-		SHOW_TEXT OFFSET student_date, 110
+		invokeTexting OFFSET student_name, 50
+		invokeTexting OFFSET student_number, 70
+		invokeTexting OFFSET student_date, 110
 	.else
 		invoke DefWindowProc, hWnd, uMsg, wParam, lParam 
         RET
