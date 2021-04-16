@@ -23,7 +23,7 @@ include /masm32/include/kernel32.inc
 	;;Кількість рядків
 	rows				   DD 5
 	;;Кроковий буфер
-	stepWithBuffer         DD 0
+	stepWith         DD 0
 	;;Шаблон негативного числа
 	textOfNegativeNumber   DB "-%i", 0
 	;;Шаблон позитивного числа
@@ -153,13 +153,13 @@ endm
 	;;Початок області code
     start:
 		;;Заповнення буферу
-        mov stepWithBuffer, offset firstRow
+        mov stepWith, offset firstRow
 		;;Призначення
-		mov EDI, 0
+		mov EDI, NULL
 		;Цикл для п'яти рядків
         calculationLoop:
-        getTheRow stepWithBuffer, EDI
-        add stepWithBuffer, 128
+        getTheRow stepWith, EDI
+        add stepWith, 128
 		;;Підвищення індекса
         add EDI, 1
 		;Порівняння на кінець програми
@@ -167,7 +167,7 @@ endm
         JNE calculationLoop
 		;Показ усіх рядків
         invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
-        invoke MessageBox, 0, addr endShowing, addr textOfWindow, MB_OK
+        invoke MessageBox, NULL, offset endShowing, offset textOfWindow, MB_OK
 		;;Закінчення програми
-        invoke ExitProcess, 0
+        invoke ExitProcess, NULL
     end start
