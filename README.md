@@ -14,5 +14,9 @@ You can just [download](https://github.com/mezgoodle/numericalMethods_labs/archi
 
 * [Third lab](https://github.com/mezgoodle/System-programming/tree/master/Lab3)
 
+* [Fourth lab](https://github.com/mezgoodle/System-programming/tree/master/Lab4)
+
+* [Fifth lab](https://github.com/mezgoodle/System-programming/tree/master/Lab5)
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
