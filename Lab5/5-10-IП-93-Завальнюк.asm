@@ -10,9 +10,9 @@ include /masm32/include/kernel32.inc
 
 .data
 	calculation            DB 0
-    coeffsA               DB -3, -3, -2, -1, 3
-    coeffsB               DB 2, 2, -2, -1, 2
-    coeffsC               DB 4, 2, 2, 3, 4
+    coeffsA                DB -3, -3, -2, -1, 3
+    coeffsB                DB 2, 2, -2, -1, 2
+    coeffsC                DB 4, 2, 2, 3, 4
 	rows				   DD 5
 	stepWithBuffer         DD 0
 	textOfNegativeNumber   DB "-%i", 0
@@ -48,48 +48,45 @@ calculateTheRow macro A, B, C_
     sub AL, 24
 	cbw
     idiv calculation
-ENDM
+endm
 
 invokeFixedNumber macro buffer, number
-    LOCAL QUIT
-	LOCAL NOT_EVEN
-
+    local quit
+	local notEven
     mov AL, number
-    SAR AL, 1
-    JB NOT_EVEN
-
-    INVOKE wsprintf, addr buffer, 
+    sar AL, 1
+    jb notEven
+    invoke wsprintf, addr buffer, 
 					 addr textOfPossitiveNumber, AL
-    JMP QUIT
-
-    NOT_EVEN:
+    jmp quit
+    notEven:
     mov AL, 5
     imul number
-    INVOKE wsprintf, addr buffer, 
+    invoke wsprintf, addr buffer, 
 					 addr textOfPossitiveNumber, AL
     
-    QUIT:
-ENDM
+    quit:
+endm
 
 invokeSingleNumber macro buffer, number
-    LOCAL QUIT
-	LOCAL POSITIVE_NUMBER
+    local quit
+	local positiveNumber
 	mov CL, -1
     mov     AL, number
-    TEST    AL, AL
-    JNS     POSITIVE_NUMBER
+    test    AL, AL
+    jns     positiveNumber
 	cbw
     imul CL
-    INVOKE wsprintf, addr buffer, 
+    invoke wsprintf, addr buffer, 
 					 addr textOfNegativeNumber, AL
-    JMP QUIT
-    POSITIVE_NUMBER:
-    INVOKE wsprintf, addr buffer, 
+    jmp quit
+    positiveNumber:
+    invoke wsprintf, addr buffer, 
 					 addr textOfPossitiveNumber, AL
-    QUIT:
-ENDM
+    quit:
+endm
 
-get_the_row macro buffer, index
+getTheRow macro buffer, index
     invokeSingleNumber aElement, coeffsA[index]
     invokeSingleNumber bElement, coeffsB[index]
     invokeSingleNumber cElement, coeffsC[index]
@@ -99,8 +96,8 @@ get_the_row macro buffer, index
     
     invokeFixedNumber rowShowing, calculation
 
-    INVOKE wsprintf, buffer, addr textOfRow, addr aElement, addr bElement, addr cElement, addr rowShowing
-ENDM
+    invoke wsprintf, buffer, addr textOfRow, addr aElement, addr bElement, addr cElement, addr rowShowing
+endm
 
 
 .code
@@ -108,16 +105,16 @@ ENDM
         
         mov stepWithBuffer, offset firstRow
 		mov EDI, 0
-        calculation_loop:
-        get_the_row stepWithBuffer, EDI
+        calculationLoop:
+        getTheRow stepWithBuffer, EDI
 
         add stepWithBuffer, 128
         add EDI, 1
         CMP EDI, rows
-        JNE calculation_loop
+        JNE calculationLoop
 
-        INVOKE wsprintf, addr endShowing, addr allResultsInOnePlace, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
+        invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
 
-        INVOKE MessageBox, 0, addr endShowing, addr textOfWindow, MB_OK
-        INVOKE ExitProcess, 0
-    END start
+        invoke MessageBox, 0, addr endShowing, addr textOfWindow, MB_OK
+        invoke ExitProcess, 0
+    end start
