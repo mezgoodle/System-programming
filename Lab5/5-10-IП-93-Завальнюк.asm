@@ -17,7 +17,7 @@ include /masm32/include/kernel32.inc
 	;;Коефіцієнти а
     coeffsA                DB -3, -3, -2, -1, 3
 	;;Коефіцієнти б
-    coeffsB                DB 2, 2, -2, -1, 2
+    coeffsB                DB 2, 2, -2, -1, -2
 	;;Коефіцієнти с
     coeffsC                DB 4, 2, 2, 3, 4
 	;;Кількість рядків
@@ -92,8 +92,9 @@ invokeFixedNumber macro place, number
     jb notEven
 	;;Парне число
 	;;Показ числа
+	cwde
     invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, AL
+					 addr textOfPossitiveNumber, eax
     jmp quit
 	;;Непарне число
     notEven:
@@ -101,8 +102,9 @@ invokeFixedNumber macro place, number
     mov AL, number
     imul BL
 	;;Показ числа
+	cwde
     invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, AL
+					 addr textOfPossitiveNumber, eax
     ;;Вихід з макросу
     quit:
 endm
