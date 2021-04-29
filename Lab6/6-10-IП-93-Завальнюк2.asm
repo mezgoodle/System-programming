@@ -137,6 +137,7 @@
 		d_arr			dq -4.1, -41.4, 3.1, -8.9, -8.4
 		y_output		dd 60,110,160,210,260
 		constants       dq 4.0, 2.0
+		temp dq 1.905
 
 		example 		db "( 2 * c - d / 23 ) / ( ln ( b - a / 4 ) )", 0
 		output			db "%d. a:%f b:%f c:%f d:%f", 13,
