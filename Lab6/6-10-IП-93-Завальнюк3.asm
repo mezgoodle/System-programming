@@ -117,68 +117,9 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	; (-2*c - sin(a/d) + 53)/(a/4 - b)
 endm
 
-;Макрос для показу кінцевого результату
-invokeFixedNumber macro place, number
-	;;Оголошення областей
-    local quit
-	local notEven
-	;;Призначення
-    mov AL, number
-	;;Здвиг у право
-    sar AL, 1
-    jb notEven
-	;;Парне число
-	;;Показ числа
-	cwde
-    invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, eax
-    jmp quit
-	;;Непарне число
-    notEven:
-    mov BL, 5
-    mov AL, number
-    imul BL
-	;;Показ числа
-	cwde
-    invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, eax
-    ;;Вихід з макросу
-    quit:
-endm
-
-;Макрос для показу коефіцієнта
-invokeSingleNumber macro place, number
-	;;Оголошення областей
-    local quit
-	local plusNumber
-	;;Призначення
-	mov CL, -1
-    mov     AL, number
-    test    AL, AL
-    jns     plusNumber
-	cbw
-	;;Множення
-    imul CL
-	;;Від'ємне число
-	;;Показ числа
-    invoke wsprintf, addr place, 
-					 addr textOfNegativeNumber, AL
-    jmp quit
-	;;Додатнє числа
-    plusNumber:
-	;;Показ числа
-    invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, AL
-	;;Вихід з макросу
-    quit:
-endm
-
 ;Макрос для отримання усього рядка
 getTheRow macro place, index
 	;;Показ коефіцієнтів
-    ;invokeSingleNumber aElement, coeffsA[index]
-  ;  invokeSingleNumber bElement, coeffsB[index]
-   ; invokeSingleNumber cElement, coeffsC[index]
 	;;Обрахунок за допомогою коефіцієнтів
     calculateTheRow a_arr[index*8], b_arr[index*8], c_arr[index*8], d_arr[index*8]
 	;;Показ попереднього обрахунку
