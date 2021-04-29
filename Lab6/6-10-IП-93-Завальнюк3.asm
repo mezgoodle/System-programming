@@ -9,11 +9,11 @@ include /masm32/include/masm32rt.inc
 .data
 	;Оголошення даних
 	;;Результат
-	calculation            DB 0
+	calculation            Dq 0
 	a_arr 			dq 0.3, 15.7, -3.6, 5.3, 11.2
 	b_arr			dq 1.98, -6.1, 5.7, 8.1, 18.3
 	c_arr			dq 3.9, -20.4, 17.5, -36.6, 21.1
-	d_arr			dq -4.1, -41.4, 3.1, -8.9, -8.4
+	d_arr			dq -1.0, -41.4, 3.1, -8.9, -8.4
 	y_output		dd 60,110,160,210,260
 	constants       dq 4.0, 2.0
 	;;Кількість рядків
@@ -64,7 +64,7 @@ include /masm32/include/masm32rt.inc
 	buff_d db 32 dup(?)
 
 ;Макрос для обрахунку рядка
-calculateTheRow macro index, a_num, b_num, c_num, d_num
+calculateTheRow macro a_num, b_num, c_num, d_num
 	finit
 		
 	fld constants[0] ; st(0) = 4
@@ -111,38 +111,6 @@ calculateTheRow macro index, a_num, b_num, c_num, d_num
 	fdiv ; st(0) = st(1)/st(0) = (4*c+d-1)/(b-tg(a/2))
 	
 	; (4*c+d-1)/(b-tg(a/2)) = 5,74128
-	; ^ works
-	
-	; ////////////////////////////
-	
-	; fld constants[0] ; st(0) = 2
-	; fld c_num		 ; st(0) = c, st(1) = 2
-	; fmul 			 ; st(0) = st(1) * st(0)
-	
-	; -2*c
-	
-	; fld	a_num 		 ; st(0) = a, st(1) = -2*c
-	; fld d_num		 ; st(0) = d, st(1) = a, st(2) = -2*c
-	; fdiv			 ; st(0) = st(1)/st(0) = a/d, st(1) = -2*c
-	; fsin 			 ; st(0) = sin(st(0)) = sin(a/d), st(1) = -2*c
-	; fsub			 ; st(0) = st(1) - st(0) = -2*c - sin(a/d)
-	
-	; -2*c - sin(a/d)
-	
-	; fld constants[8] ; st(0) = 53, st(1) = -2*c - sin(a/d)
-	; fadd			 ; st(0) = st(1) + st(0) = -2*c - sin(a/d) + 53
-
-	; -2*c - sin(a/d) + 53
-
-	; fld a_num		 ; st(0) = a, st(1) = -2*c - sin(a/d) + 53
-	; fld constants[16]; st(0) = 4, st(1) = a, st(2) = -2*c - sin(a/d) + 53
-	; fdiv			 ; st(0) = st(1)/st(0) = a/4, st(1) = -2*c - sin(a/d) + 53
-
-	; a/4
-
-	; fld b_num		 ; st(0) = b, st(1) = a/4, st(2) = -2*c - sin(a/d) + 53
-	; fsub 			 ; st(0) = st(1) - st(0) = a/4 - b, st(1) = -2*c - sin(a/d) + 53
-	; fdiv			 ; st(0) = st(1)/st(0) = (-2*c - sin(a/d) + 53)/(a/4 - b) 
 
 	fstp calculation
 	
@@ -212,13 +180,13 @@ getTheRow macro place, index
   ;  invokeSingleNumber bElement, coeffsB[index]
    ; invokeSingleNumber cElement, coeffsC[index]
 	;;Обрахунок за допомогою коефіцієнтів
-    ;calculateTheRow a_arr[index*4], b_arr[index*4], c_arr[index*4], d_arr[index*4]
+    calculateTheRow a_arr[index*8], b_arr[index*8], c_arr[index*8], d_arr[index*8]
 	;;Показ попереднього обрахунку
-	invoke FloatToStr2, a_arr[index*4], addr buff_a
-	invoke FloatToStr2, b_arr[index*4], addr buff_b
-	invoke FloatToStr2, c_arr[index*4], addr buff_c
-	invoke FloatToStr2, d_arr[index*4], addr buff_d
-	invoke FloatToStr2, a_arr[0], addr buff_res
+	invoke FloatToStr2, a_arr[index*8], addr buff_a
+	invoke FloatToStr2, b_arr[index*8], addr buff_b
+	invoke FloatToStr2, c_arr[index*8], addr buff_c
+	invoke FloatToStr2, d_arr[index*8], addr buff_d
+	invoke FloatToStr2, calculation, addr buff_res
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr buff_a, addr buff_b, addr buff_c, addr buff_d, addr buff_res
 endm
