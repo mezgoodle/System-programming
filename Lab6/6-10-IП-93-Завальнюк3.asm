@@ -16,7 +16,8 @@ include /masm32/include/masm32rt.inc
 	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
 	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
 	numberTwoValue         DQ 2.0
-	nulevinValue           DQ 0.0
+	nulevinValue           DQ 1.0
+	nulevinValue1          DQ -1.0
 	numberFourValue        DQ 4.0
 	;;Кількість рядків 
 	rows				   DD 5
@@ -93,14 +94,23 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	fld secondCoef
 	;;Ділення аргумента для тангенса
 	fdiv
-	;;Оскільки у тангенса в знаменнику косинус, а косинус від нуля - нуль, то тут помилка
-	;;По суті, можна одразу перевіряти чи коефіцієнт А нуль
+	;;Оскільки у тангенса в знаменнику косинус, а косинус може мати значення - нуль, то тут помилка
+	;;По суті, ми робимо перевірку чи синус дорівнює 1 або -1
+	fsin
 	fcom    nulevinValue 
     fstsw   AX
     SAHF
     JE      foundedTangensNulevin
+	fcom    nulevinValue1 
+    fstsw   AX
+    SAHF
+    JE      foundedTangensNulevin
+	fld elementA
+	fld secondCoef
+	;;Ділення аргумента для тангенса
+	fdiv
+	fcos
 	;;Виконання тангенса
-	fptan
 	fdiv
 	;;Віднімання у знаменнику	
 	fsub
