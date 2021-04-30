@@ -16,7 +16,7 @@ include /masm32/include/masm32rt.inc
 	coeffsC				   DQ 3.9, -20.4, 17.5, -36.6, 21.1
 	coeffsD				   DQ -1.0, -41.4, 3.1, -8.9, -8.4
 	numberTwoValue         DQ 2.0
-	nulevinValue          DQ 0.0
+	nulevinValue           DQ 0.0
 	numberFourValue        DQ 4.0
 	;;Кількість рядків 
 	rows				   DD 5
@@ -59,28 +59,26 @@ include /masm32/include/masm32rt.inc
 	;;П'ятий показ
     fifthRow              DB 128 DUP (?)
 	;;Показ рядку
-	rowShowing       	   DB 32 DUP (?)
-	equationResultat              DB 128 DUP (?)
+	rowShowing       	  DB 32 DUP (?)
+	;;Буфер для обрахунків рядка
+	equationResultat      DB 128 DUP (?)
 
 
 ;Макрос для обрахунку рядка
 calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef
+	;;Заповнення буферів коефіцієнтами
 	invoke FloatToStr2, elementA, addr aElement
 	invoke FloatToStr2, elementB, addr bElement
 	invoke FloatToStr2, elementC, addr cElement
 	invoke FloatToStr2, elementD, addr dElement
 
 	finit
-		
-	fld firstCoef ; st(0) = 4
-	fld elementC		 ; st(0) = c, st(1) = 4
-	fmul 			 ; st(0) = st(1) * st(0)
-	
-	
-
-	; 4*c = 15,6
-	; ^ works
-
+	;;Вставка першого числа
+	fld elementC
+	fld firstCoef
+	;;Перше множення в чисельнику
+	fmul
+	;;Вставка другого числа
 	fld elementD ; st(0) = d, st(1) = 4*c
 	
 	
