@@ -106,10 +106,15 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	
 	fdiv ; st(0) = st(1)/st(0) = a/2, st(1) = b, st(2) = 4*c+d-1
 	
+	;; HERE CHECK
+	
 	; a/2 = 0,15
 	; ^ works
 	
 	fptan ; st(0) = 1, st(1) = tg(st(0)) st(2) = b, st(3) = 4*c+d-1
+	
+	;; HERE CHECK
+
 	fdiv ; st(0) = st(1)/st(0) = tg(a/2), st(1) = b, st(2) = 4*c+d-1
 	
 	; tg(a/2) = 0,151135
@@ -126,8 +131,21 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 
 	fstp calculation
 	
+	invoke FloatToStr2, a_num, addr buff_a
+	invoke FloatToStr2, b_num, addr buff_b
+	invoke FloatToStr2, c_num, addr buff_c
+	invoke FloatToStr2, d_num, addr buff_d
+	invoke FloatToStr2, calculation, addr buff_res
+	
+	JMP quit
+	
 	; (-2*c - sin(a/d) + 53)/(a/4 - b)
 	division_by_zero:
+	invoke FloatToStr2, a_num, addr buff_a
+	invoke FloatToStr2, b_num, addr buff_b
+	invoke FloatToStr2, c_num, addr buff_c
+	invoke FloatToStr2, d_num, addr buff_d
+	invoke wsprintf, addr buff_res, addr TEXT
 	JMP quit
 	quit:
 endm
@@ -138,11 +156,6 @@ getTheRow macro place, index
 	;;Обрахунок за допомогою коефіцієнтів
     calculateTheRow a_arr[index*8], b_arr[index*8], c_arr[index*8], d_arr[index*8]
 	;;Показ попереднього обрахунку
-	invoke FloatToStr2, a_arr[index*8], addr buff_a
-	invoke FloatToStr2, b_arr[index*8], addr buff_b
-	invoke FloatToStr2, c_arr[index*8], addr buff_c
-	invoke FloatToStr2, d_arr[index*8], addr buff_d
-	invoke FloatToStr2, calculation, addr buff_res
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr buff_a, addr buff_b, addr buff_c, addr buff_d, addr buff_res
 endm
