@@ -20,18 +20,16 @@ include /masm32/include/masm32rt.inc
 	rows				   DD 5
 	;;Кроковий буфер
 	stepWith         DD 0
-	;;Шаблон негативного числа
-	textOfNegativeNumber   DB "-%i", 0
-	;;Шаблон позитивного числа
-    textOfPossitiveNumber  DB "%i", 0
 	TEXT  DB "(4*c + d - 1) / (b - tg(a / 2))", 0
+	errorNulevinText  DB "Помилка, ділення на нуль", 0
+	errorNulevinTangensText  DB "Помилка, косинус дорівнює нулеві", 0
 	;;Текст користувацького вікна зверху
     textOfWindow       	   DB "Математичні розрахунки", 0
 	;;Шаблон усіх результатів
     allResultsInOnePlace   DB "Головне рiвняння -  %s", 10, "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
-	zero DQ -1.0
+	nulevinNumber DQ 0.0
     
 	
 .data?
@@ -69,6 +67,11 @@ include /masm32/include/masm32rt.inc
 
 ;Макрос для обрахунку рядка
 calculateTheRow macro a_num, b_num, c_num, d_num
+	invoke FloatToStr2, a_num, addr buff_a
+	invoke FloatToStr2, b_num, addr buff_b
+	invoke FloatToStr2, c_num, addr buff_c
+	invoke FloatToStr2, d_num, addr buff_d
+
 	finit
 		
 	fld constants[0] ; st(0) = 4
@@ -82,10 +85,6 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 
 	fld d_num ; st(0) = d, st(1) = 4*c
 	
-	fcom    zero 
-    fstsw   AX
-    SAHF
-    JE      division_by_zero
 	
 	fadd ; st(0) = st(1) + st(0) = 4*c+d
 	
@@ -106,7 +105,10 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	
 	fdiv ; st(0) = st(1)/st(0) = a/2, st(1) = b, st(2) = 4*c+d-1
 	
-	;; HERE CHECK
+	fcom    nulevinNumber 
+    fstsw   AX
+    SAHF
+    JE      foundedTangensNulevin
 	
 	; a/2 = 0,15
 	; ^ works
@@ -122,6 +124,11 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	
 	fsub ; st(0) = st(1)-st(0) = b-tg(a/2), st(1) = 4*c+d-1
 	
+	fcom    nulevinNumber 
+    fstsw   AX
+    SAHF
+    JE      foundedNulevin
+	
 	; b-tg(a/2) = 1,82886
 	; ^ works
 	
@@ -131,21 +138,17 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 
 	fstp calculation
 	
-	invoke FloatToStr2, a_num, addr buff_a
-	invoke FloatToStr2, b_num, addr buff_b
-	invoke FloatToStr2, c_num, addr buff_c
-	invoke FloatToStr2, d_num, addr buff_d
+
 	invoke FloatToStr2, calculation, addr buff_res
 	
 	JMP quit
 	
 	; (-2*c - sin(a/d) + 53)/(a/4 - b)
-	division_by_zero:
-	invoke FloatToStr2, a_num, addr buff_a
-	invoke FloatToStr2, b_num, addr buff_b
-	invoke FloatToStr2, c_num, addr buff_c
-	invoke FloatToStr2, d_num, addr buff_d
-	invoke wsprintf, addr buff_res, addr TEXT
+	foundedNulevin:
+	invoke wsprintf, addr buff_res, addr errorNulevinText
+	JMP quit
+	foundedTangensNulevin:
+	invoke wsprintf, addr buff_res, addr errorNulevinTangensText
 	JMP quit
 	quit:
 endm
