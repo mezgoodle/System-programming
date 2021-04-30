@@ -3,7 +3,7 @@
 .model flat, stdcall
 option CaseMap:None
 
-;Під'єднання необхідних бібліотек
+;Під'єднання необхідної бібліотеки
 include /masm32/include/masm32rt.inc
 
 .data
@@ -11,10 +11,10 @@ include /masm32/include/masm32rt.inc
 	;;Результат
 	calculation            DQ 0
 	;;Усі вхідні дані
-	coeffsA 			   DQ 0.3, 15.7, -3.6, 5.3, 11.2
-	coeffsB			       DQ 1.98, -6.1, 5.7, 8.1, 18.3
-	coeffsC				   DQ 3.9, -20.4, 17.5, -36.6, 21.1
-	coeffsD				   DQ -1.0, -41.4, 3.1, -8.9, -8.4
+	coeffsA 			   DQ 7.36, 39.5, 6.35, 13.9, 27.5
+	coeffsB			       DQ -2.25, -1.41, -9.74, 28.4, -2.66
+	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
+	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
 	numberTwoValue         DQ 2.0
 	nulevinValue           DQ 0.0
 	numberFourValue        DQ 4.0
@@ -43,9 +43,9 @@ include /masm32/include/masm32rt.inc
 	;;Елемент з масиву с
     cElement              DB 32 DUP (?)
 	;;Елемент з масиву д
-	dElement 			  DB 32 dup(?)
+	dElement 			  DB 32 DUP(?)
 	;;Результат на кожному рядку
-	bufferForResult db 128 dup(?)
+	bufferForResult 	  DQ 128 DUP(?)
 	;;Закінчення показу
 	endShowing            DB 1024 DUP (?)
 	;;Перший результат
@@ -61,7 +61,7 @@ include /masm32/include/masm32rt.inc
 	;;Показ рядку
 	rowShowing       	  DB 32 DUP (?)
 	;;Буфер для обрахунків рядка
-	equationResultat      DB 128 DUP (?)
+	equationResultat      DQ 128 DUP (?)
 
 
 ;Макрос для обрахунку рядка
