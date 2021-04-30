@@ -24,13 +24,14 @@ include /masm32/include/masm32rt.inc
 	textOfNegativeNumber   DB "-%i", 0
 	;;Шаблон позитивного числа
     textOfPossitiveNumber  DB "%i", 0
-	TEXT  DB "XAXAXAXAXAXXAX", 0
+	TEXT  DB "(4*c + d - 1) / (b - tg(a / 2))", 0
 	;;Текст користувацького вікна зверху
     textOfWindow       	   DB "Математичні розрахунки", 0
 	;;Шаблон усіх результатів
     allResultsInOnePlace   DB "Головне рiвняння -  %s", 10, "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
+	zero DQ -1.0
     
 	
 .data?
@@ -81,6 +82,11 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 
 	fld d_num ; st(0) = d, st(1) = 4*c
 	
+	fcom    zero 
+    fstsw   AX
+    SAHF
+    JE      division_by_zero
+	
 	fadd ; st(0) = st(1) + st(0) = 4*c+d
 	
 	
@@ -121,6 +127,9 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	fstp calculation
 	
 	; (-2*c - sin(a/d) + 53)/(a/4 - b)
+	division_by_zero:
+	JMP quit
+	quit:
 endm
 
 ;Макрос для отримання усього рядка
