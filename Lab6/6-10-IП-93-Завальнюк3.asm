@@ -78,75 +78,55 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	fld firstCoef
 	;;Перше множення в чисельнику
 	fmul
+	;;Вставка одиниці
+	fld1
+	;;Віднімання одиниці від попереднього обрахунку
+	fsub
 	;;Вставка другого числа
-	fld elementD ; st(0) = d, st(1) = 4*c
-	
-	
-	fadd ; st(0) = st(1) + st(0) = 4*c+d
-	
-	
-	; 4*c+d = 11,5
-	; ^ works
-
-	fld1 ; st(0) = 1, st(1) = 4*c+d
-	fsub ; st(0) = st(1) - st(0) = 4*c+d-1
-
-	; 4*c+d-1 = 10,5
-	; ^ works
-	
-	fld elementB ; st(0) = b, st(1) = 4*c+d-1
-	
-	fld elementA ; st(0) = a, st(1) = b, st(2) = 4*c+d-1
-	fld secondCoef ; st(0) = 2, st(1) = a, st(2) = b, st(3) = 4*c+d-1
-	
-	fdiv ; st(0) = st(1)/st(0) = a/2, st(1) = b, st(2) = 4*c+d-1
-	
+	fld elementD
+	;;Сума в чисельнику
+	fadd
+	;;Вставка третього числа
+	fld elementB
+	;;Вставка четвертого числа та підготовка його для тангенса
+	fld elementA
+	fld secondCoef
+	;;Ділення аргумента для тангенса
+	fdiv
+	;;Оскільки у тангенса в знаменнику косинус, а косинус від нуля - нуль, то тут помилка
+	;;По суті, можна одразу перевіряти чи коефіцієнт А нуль
 	fcom    nulevinValue 
     fstsw   AX
     SAHF
     JE      foundedTangensNulevin
-	
-	; a/2 = 0,15
-	; ^ works
-	
-	fptan ; st(0) = 1, st(1) = tg(st(0)) st(2) = b, st(3) = 4*c+d-1
-	
-	;; HERE CHECK
-
-	fdiv ; st(0) = st(1)/st(0) = tg(a/2), st(1) = b, st(2) = 4*c+d-1
-	
-	; tg(a/2) = 0,151135
-	; ^ works
-	
-	fsub ; st(0) = st(1)-st(0) = b-tg(a/2), st(1) = 4*c+d-1
-	
+	;;Виконання тангенса
+	fptan
+	fdiv
+	;;Віднімання у знаменнику	
+	fsub
+	;;Перевірка на нуль у знаменнику
 	fcom    nulevinValue 
     fstsw   AX
     SAHF
     JE      foundedNulevin
-	
-	; b-tg(a/2) = 1,82886
-	; ^ works
-	
-	fdiv ; st(0) = st(1)/st(0) = (4*c+d-1)/(b-tg(a/2))
-	
-	; (4*c+d-1)/(b-tg(a/2)) = 5,74128
-
+	;;Останнє ділення
+	fdiv
+	;;Вставка результату в буфер
 	fstp calculation
-	
-
 	invoke FloatToStr2, calculation, addr bufferForResult
 	
-	JMP quit
+	JMP stukovGates
 	
-	; (-2*c - sin(a/d) + 53)/(a/4 - b)
 	foundedNulevin:
+	;;Нуль у знаменнику
 	invoke wsprintf, addr bufferForResult, addr errorNulevinText
-	JMP quit
+	JMP stukovGates
 	foundedTangensNulevin:
+	;;Нуль в тангенсі
 	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
-	JMP quit
-	quit:
+	JMP stukovGates
+	;;Вихід з макросу обрахунку
+	stukovGates:
 endm
 
 ;Макрос для отримання усього рядка
@@ -154,7 +134,6 @@ getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
     calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
-	;;Показ попереднього обрахунку
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
 endm
