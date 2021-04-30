@@ -3,54 +3,52 @@
 .model flat, stdcall
 option CaseMap:None
 
-;Під'єднання необхідних бібліотек
-include /masm32/include/windows.inc
-include /masm32/include/user32.inc
-include /masm32/include/kernel32.inc
-include /masm32/include/fpu.inc
-include /masm32/include/msvcrt.inc
-
-includelib /masm32/lib/user32.lib
-includelib /masm32/lib/kernel32.lib
-includelib /masm32/lib/fpu.lib
-includelib /masm32/lib/msvcrt.lib
+;Під'єднання необхідної бібліотеки
+include /masm32/include/masm32rt.inc
 
 .data
 	;Оголошення даних
 	;;Результат
-	calculation            DB 0
-	;;Коефіцієнти а
-    coeffsA                DB -3, -3, -2, -1, 3
-	;;Коефіцієнти б
-    coeffsB                DB 2, 2, -2, -1, -2
-	;;Коефіцієнти с
-    coeffsC                DB 4, 2, 2, 3, 4
-	;;Кількість рядків
+	calculation            DQ 0
+	;;Усі вхідні дані
+	coeffsA 			   DQ 7.36, 39.5, 6.35, 13.9, 27.5
+	coeffsB			       DQ -2.25, -1.41, -9.74, 28.4, -2.66
+	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
+	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
+	numberTwoValue         DQ 2.0
+	nulevinValue           DQ 1.0
+	nulevinValue1          DQ -1.0
+	numberFourValue        DQ 4.0
+	;;Кількість рядків 
 	rows				   DD 5
 	;;Кроковий буфер
-	stepWith         DD 0
-	;;Шаблон негативного числа
-	textOfNegativeNumber   DB "-%i", 0
-	;;Шаблон позитивного числа
-    textOfPossitiveNumber  DB "%i", 0
+	stepWith         	   DD 0
+	;;Текст рівняння
+	equationText           DB "(4*c + d - 1) / (b - tg(a / 2))", 0
+	;;Тексти помилок
+	errorNulevinText       DB "Помилка, ділення на нуль", 0
+	errorNulevinTangensText DB "Помилка, косинус дорівнює нулеві", 0
 	;;Текст користувацького вікна зверху
     textOfWindow       	   DB "Математичні розрахунки", 0
 	;;Шаблон усіх результатів
-    allResultsInOnePlace   DB "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
+    allResultsInOnePlace   DB "Головне рiвняння -  %s", 10, "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
-    textOfRow              DB "a = %s, b = %s, c = %s, результат = %s", 0
-    
+    textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
 	
 .data?
 	;Оголошення даних
 	;;Елемент з масиву а
-    aElement              DB 16 DUP (?)
+    aElement              DB 32 DUP (?)
 	;;Елемент з масиву б
-    bElement              DB 16 DUP (?)
+    bElement              DB 32 DUP (?)
 	;;Елемент з масиву с
-    cElement              DB 16 DUP (?)
+    cElement              DB 32 DUP (?)
+	;;Елемент з масиву д
+	dElement 			  DB 32 DUP(?)
+	;;Результат на кожному рядку
+	bufferForResult 	  DQ 128 DUP(?)
 	;;Закінчення показу
-	endShowing             DB 1024 DUP (?)
+	endShowing            DB 1024 DUP (?)
 	;;Перший результат
     firstRow              DB 128 DUP (?)
 	;;Другий результат
@@ -62,98 +60,92 @@ includelib /masm32/lib/msvcrt.lib
 	;;П'ятий показ
     fifthRow              DB 128 DUP (?)
 	;;Показ рядку
-	rowShowing       	   DB 32 DUP (?)
+	rowShowing       	  DB 32 DUP (?)
+	;;Буфер для обрахунків рядка
+	equationResultat      DQ 128 DUP (?)
+
 
 ;Макрос для обрахунку рядка
-calculateTheRow macro A, B, C_
-	;;Призначення
-    mov AL, 1
-	add AL, 1
-	;;Множення
-    imul A
-    imul C_
-	add AL, -1
-    mov calculation, AL
-    mov AL, 1
-    imul C_
-	;;Ділення
-    idiv B
-	add AL, A
-    add AL, -24
-	;;Конвертація у word
-	cbw
-    idiv calculation
-endm
+calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef
+	;;Заповнення буферів коефіцієнтами
+	invoke FloatToStr2, elementA, addr aElement
+	invoke FloatToStr2, elementB, addr bElement
+	invoke FloatToStr2, elementC, addr cElement
+	invoke FloatToStr2, elementD, addr dElement
 
-;Макрос для показу кінцевого результату
-invokeFixedNumber macro place, number
-	;;Оголошення областей
-    local quit
-	local notEven
-	;;Призначення
-    mov AL, number
-	;;Здвиг у право
-    sar AL, 1
-    jb notEven
-	;;Парне число
-	;;Показ числа
-	cwde
-    invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, eax
-    jmp quit
-	;;Непарне число
-    notEven:
-    mov BL, 5
-    mov AL, number
-    imul BL
-	;;Показ числа
-	cwde
-    invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, eax
-    ;;Вихід з макросу
-    quit:
-endm
-
-;Макрос для показу коефіцієнта
-invokeSingleNumber macro place, number
-	;;Оголошення областей
-    local quit
-	local plusNumber
-	;;Призначення
-	mov CL, -1
-    mov     AL, number
-    test    AL, AL
-    jns     plusNumber
-	cbw
-	;;Множення
-    imul CL
-	;;Від'ємне число
-	;;Показ числа
-    invoke wsprintf, addr place, 
-					 addr textOfNegativeNumber, AL
-    jmp quit
-	;;Додатнє числа
-    plusNumber:
-	;;Показ числа
-    invoke wsprintf, addr place, 
-					 addr textOfPossitiveNumber, AL
-	;;Вихід з макросу
-    quit:
+	finit
+	;;Вставка першого числа
+	fld elementC
+	fld firstCoef
+	;;Перше множення в чисельнику
+	fmul
+	;;Вставка одиниці
+	fld1
+	;;Віднімання одиниці від попереднього обрахунку
+	fsub
+	;;Вставка другого числа
+	fld elementD
+	;;Сума в чисельнику
+	fadd
+	;;Вставка третього числа
+	fld elementB
+	;;Вставка четвертого числа та підготовка його для тангенса
+	fld elementA
+	fld secondCoef
+	;;Ділення аргумента для тангенса
+	fdiv
+	;;Оскільки у тангенса в знаменнику косинус, а косинус може мати значення - нуль, то тут помилка
+	;;По суті, ми робимо перевірку чи синус дорівнює 1 або -1
+	fsin
+	fcom    nulevinValue 
+    fstsw   AX
+    SAHF
+    JE      foundedTangensNulevin
+	fcom    nulevinValue1 
+    fstsw   AX
+    SAHF
+    JE      foundedTangensNulevin
+	fld elementA
+	fld secondCoef
+	;;Ділення аргумента для тангенса
+	fdiv
+	fcos
+	;;Виконання тангенса
+	fdiv
+	;;Віднімання у знаменнику	
+	fsub
+	;;Перевірка на нуль у знаменнику
+	fcom    nulevinValue 
+    fstsw   AX
+    SAHF
+    JE      foundedNulevin
+	;;Останнє ділення
+	fdiv
+	;;Вставка результату в буфер
+	fstp calculation
+	invoke FloatToStr2, calculation, addr bufferForResult
+	
+	JMP stukovGates
+	
+	foundedNulevin:
+	;;Нуль у знаменнику
+	invoke wsprintf, addr bufferForResult, addr errorNulevinText
+	JMP stukovGates
+	foundedTangensNulevin:
+	;;Нуль в тангенсі
+	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
+	JMP stukovGates
+	;;Вихід з макросу обрахунку
+	stukovGates:
 endm
 
 ;Макрос для отримання усього рядка
 getTheRow macro place, index
 	;;Показ коефіцієнтів
-    invokeSingleNumber aElement, coeffsA[index]
-    invokeSingleNumber bElement, coeffsB[index]
-    invokeSingleNumber cElement, coeffsC[index]
 	;;Обрахунок за допомогою коефіцієнтів
-    calculateTheRow coeffsA[index], coeffsB[index], coeffsC[index]
-    mov calculation, AL
-	;;Показ попереднього обрахунку
-    invokeFixedNumber rowShowing, calculation
+    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
 	;;Показ усього рядка
-    invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr rowShowing
+    invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
 endm
 
 .code
@@ -173,7 +165,8 @@ endm
         CMP EDI, rows
         JNE calculationLoop
 		;Показ усіх рядків
-        invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
+		invoke wsprintf, addr equationResultat, addr equationText
+        invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr equationResultat, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
         invoke MessageBox, NULL, offset endShowing, offset textOfWindow, MB_OK
 		;;Закінчення програми
         invoke ExitProcess, NULL
