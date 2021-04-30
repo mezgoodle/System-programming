@@ -9,27 +9,27 @@ include /masm32/include/masm32rt.inc
 .data
 	;Оголошення даних
 	;;Результат
-	calculation            Dq 0
-	a_arr 			dq 0.3, 15.7, -3.6, 5.3, 11.2
-	b_arr			dq 1.98, -6.1, 5.7, 8.1, 18.3
-	c_arr			dq 3.9, -20.4, 17.5, -36.6, 21.1
-	d_arr			dq -1.0, -41.4, 3.1, -8.9, -8.4
-	y_output		dd 60,110,160,210,260
-	constants       dq 4.0, 2.0
+	calculation            DQ 0
+	a_arr 				   DQ 0.3, 15.7, -3.6, 5.3, 11.2
+	b_arr			       DQ 1.98, -6.1, 5.7, 8.1, 18.3
+	c_arr				   DQ 3.9, -20.4, 17.5, -36.6, 21.1
+	d_arr				   DQ -1.0, -41.4, 3.1, -8.9, -8.4
+	numberFourValue        DQ 4.0
+	numberTwoValue         DQ 2.0
 	;;Кількість рядків
 	rows				   DD 5
 	;;Кроковий буфер
-	stepWith         DD 0
-	TEXT  DB "(4*c + d - 1) / (b - tg(a / 2))", 0
-	errorNulevinText  DB "Помилка, ділення на нуль", 0
-	errorNulevinTangensText  DB "Помилка, косинус дорівнює нулеві", 0
+	stepWith         	   DD 0
+	equationText           DB "(4*c + d - 1) / (b - tg(a / 2))", 0
+	errorNulevinText       DB "Помилка, ділення на нуль", 0
+	errorNulevinTangensText DB "Помилка, косинус дорівнює нулеві", 0
 	;;Текст користувацького вікна зверху
     textOfWindow       	   DB "Математичні розрахунки", 0
 	;;Шаблон усіх результатів
     allResultsInOnePlace   DB "Головне рiвняння -  %s", 10, "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
-	nulevinNumber DQ 0.0
+	nulevinNumber          DQ 0.0
     
 	
 .data?
@@ -66,7 +66,7 @@ include /masm32/include/masm32rt.inc
 	
 
 ;Макрос для обрахунку рядка
-calculateTheRow macro a_num, b_num, c_num, d_num
+calculateTheRow macro a_num, b_num, c_num, d_num, firstCoef, secondCoef
 	invoke FloatToStr2, a_num, addr buff_a
 	invoke FloatToStr2, b_num, addr buff_b
 	invoke FloatToStr2, c_num, addr buff_c
@@ -74,7 +74,7 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 
 	finit
 		
-	fld constants[0] ; st(0) = 4
+	fld firstCoef ; st(0) = 4
 	fld c_num		 ; st(0) = c, st(1) = 4
 	fmul 			 ; st(0) = st(1) * st(0)
 	
@@ -101,7 +101,7 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	fld b_num ; st(0) = b, st(1) = 4*c+d-1
 	
 	fld a_num ; st(0) = a, st(1) = b, st(2) = 4*c+d-1
-	fld constants[8] ; st(0) = 2, st(1) = a, st(2) = b, st(3) = 4*c+d-1
+	fld secondCoef ; st(0) = 2, st(1) = a, st(2) = b, st(3) = 4*c+d-1
 	
 	fdiv ; st(0) = st(1)/st(0) = a/2, st(1) = b, st(2) = 4*c+d-1
 	
@@ -157,7 +157,7 @@ endm
 getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
-    calculateTheRow a_arr[index*8], b_arr[index*8], c_arr[index*8], d_arr[index*8]
+    calculateTheRow a_arr[index*8], b_arr[index*8], c_arr[index*8], d_arr[index*8], numberFourValue, numberTwoValue
 	;;Показ попереднього обрахунку
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr buff_a, addr buff_b, addr buff_c, addr buff_d, addr buff_res
@@ -180,7 +180,7 @@ endm
         CMP EDI, rows
         JNE calculationLoop
 		;Показ усіх рядків
-		invoke wsprintf, addr maininfo, addr TEXT
+		invoke wsprintf, addr maininfo, addr equationText
         invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr maininfo, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
         invoke MessageBox, NULL, offset endShowing, offset textOfWindow, MB_OK
 		;;Закінчення програми
