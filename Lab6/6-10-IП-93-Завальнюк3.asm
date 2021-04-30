@@ -62,6 +62,11 @@ include /masm32/include/masm32rt.inc
 	buff_b db 32 dup(?)
 	buff_c db 32 dup(?)
 	buff_d db 32 dup(?)
+	buff_add_1 db 32 dup(?)
+	buff_add_2 db 32 dup(?)
+	buff_add_3 db 32 dup(?)
+	buff_add_4 db 32 dup(?)
+	
 
 ;Макрос для обрахунку рядка
 calculateTheRow macro a_num, b_num, c_num, d_num
