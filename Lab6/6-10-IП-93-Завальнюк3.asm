@@ -33,7 +33,7 @@ include /masm32/include/masm32rt.inc
 	;;Шаблон усіх результатів
     allResultsInOnePlace   DB "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
-    textOfRow              DB "a = %s, b = %s, c = %s, d = %s, buff_1 = %s, результат = %s", 0
+    textOfRow              DB "a = %s, b = %s, c = %s, d = %s, buff_1 = %s, buff_2 = %s, результат = %s", 0
     
 	
 .data?
@@ -81,7 +81,7 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	fmul 			 ; st(0) = st(1) * st(0)
 	
 	fstp calculation_1
-	invoke FloatToStr2, calculation_1, addr buff_add_1
+	
 
 	; 4*c = 15,6
 	; ^ works
@@ -89,6 +89,8 @@ calculateTheRow macro a_num, b_num, c_num, d_num
 	fld d_num ; st(0) = d, st(1) = 4*c
 	
 	fadd ; st(0) = st(1) + st(0) = 4*c+d
+	
+	fstp calculation_2
 	
 	; 4*c+d = 11,5
 	; ^ works
@@ -139,9 +141,11 @@ getTheRow macro place, index
 	invoke FloatToStr2, b_arr[index*8], addr buff_b
 	invoke FloatToStr2, c_arr[index*8], addr buff_c
 	invoke FloatToStr2, d_arr[index*8], addr buff_d
+	invoke FloatToStr2, calculation_1, addr buff_add_1
+	invoke FloatToStr2, calculation_2, addr buff_add_2
 	invoke FloatToStr2, calculation, addr buff_res
 	;;Показ усього рядка
-    invoke wsprintf, place, addr textOfRow, addr buff_a, addr buff_b, addr buff_c, addr buff_d, addr buff_add_1, addr buff_res
+    invoke wsprintf, place, addr textOfRow, addr buff_a, addr buff_b, addr buff_c, addr buff_d, addr buff_add_1, addr buff_add_2, addr buff_res
 endm
 
 .code
