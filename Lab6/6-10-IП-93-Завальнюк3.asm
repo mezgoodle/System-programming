@@ -24,10 +24,11 @@ include /masm32/include/masm32rt.inc
 	textOfNegativeNumber   DB "-%i", 0
 	;;Шаблон позитивного числа
     textOfPossitiveNumber  DB "%i", 0
+	TEXT  DB "XAXAXAXAXAXXAX", 0
 	;;Текст користувацького вікна зверху
     textOfWindow       	   DB "Математичні розрахунки", 0
 	;;Шаблон усіх результатів
-    allResultsInOnePlace   DB "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
+    allResultsInOnePlace   DB "Головне рiвняння -  %s", 10, "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
     
@@ -54,6 +55,7 @@ include /masm32/include/masm32rt.inc
     fifthRow              DB 128 DUP (?)
 	;;Показ рядку
 	rowShowing       	   DB 32 DUP (?)
+	maininfo              DB 128 DUP (?)
 	
 .data?
 	
@@ -153,7 +155,8 @@ endm
         CMP EDI, rows
         JNE calculationLoop
 		;Показ усіх рядків
-        invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
+		invoke wsprintf, addr maininfo, addr TEXT
+        invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr maininfo, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
         invoke MessageBox, NULL, offset endShowing, offset textOfWindow, MB_OK
 		;;Закінчення програми
         invoke ExitProcess, NULL
