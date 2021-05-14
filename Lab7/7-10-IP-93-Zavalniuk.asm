@@ -15,7 +15,7 @@ include /masm32/include/masm32rt.inc
 	coeffsB			       DQ 0, -1.41, -9.74, 28.4, -2.66
 	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
 	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
-	num2         		   DQ 2.0
+	numberTwoValue         		   DQ 2.0
 	nulevinValue           DQ 1.0
 	nulevinValue1          DQ -1.0
 	nulevinValue2          DQ 0.0
@@ -127,12 +127,12 @@ endm
 getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
-    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, num2
+    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
 endm
 
-public coeffsA, coeffsB, num2, res2
+public coeffsA, coeffsB, numberTwoValue, res2
 extern ExternPublicProcedureMain@0:near
 .code
 RegisterProcedureMain proc
