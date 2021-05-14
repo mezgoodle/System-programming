@@ -24,10 +24,6 @@ include /masm32/include/masm32rt.inc
 	rows				   DD 5
 	;;Кроковий буфер
 	stepWith         	   DD 0
-	
-	tempValue dq 40.0
-	tempValue1 dq 20.0
-	
 	;;Текст рівняння
 	equationText           DB "(4*c + d - 1) / (b - tg(a / 2))", 0
 	;;Тексти помилок
@@ -74,7 +70,7 @@ include /masm32/include/masm32rt.inc
 
 
 ;Макрос для обрахунку рядка
-calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef, nulevinValue2, tempValue
+calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef
 	
 	;;Заповнення буферів коефіцієнтами
 	invoke FloatToStr2, elementA, addr aElement
@@ -86,28 +82,17 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	
 	lea ecx, coeffsC[8*edi]
 	lea eax, firstCoef
-	call RaynorProc
+	call RegisterProcedureMain
 	
 	lea edx, elementD
 	lea eax, res1
 	push edx
 	push eax
-	call SamuroProc
-	
-	mov tempValue, tempValue1
+	call StackProcedureMain
 	
 	call ExternPublicProcedureMain@0 ; викликаємо третю процедуру
 
 	finit
-	
-	fld tempValue
-	
-	;;Перевірка на нуль у знаменнику
-	fcom    nulevinValue2 
-    fstsw   ax
-    SAHF
-    JE      foundedTangensNulevin
-	
 	fld res1
 	fld res2
 	
@@ -116,7 +101,6 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
     fstsw   ax
     SAHF
     JE      foundedNulevin
-
 	
 	fdiv
 	fstp calculation ; result = stack[0]
@@ -127,7 +111,7 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	;;Нуль у знаменнику
 	invoke wsprintf, addr bufferForResult, addr errorNulevinText
 	JMP stukovGates
-	
+
 	foundedTangensNulevin:
 	;;Нуль в тангенсі
 	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
@@ -151,7 +135,7 @@ endm
 public coeffsA, coeffsB, num2, res2
 extern ExternPublicProcedureMain@0:near
 .code
-RaynorProc proc
+RegisterProcedureMain proc
 	finit
 	;;Вставка першого числа
 	fld qword ptr [ecx]
@@ -165,9 +149,9 @@ RaynorProc proc
 	mov eax, offset res1
 	fstp qword ptr [eax]
 	ret
-RaynorProc endp 
+RegisterProcedureMain endp 
 
-SamuroProc proc
+StackProcedureMain proc
 	finit
 	push ebp
 	mov ebp, esp
@@ -180,7 +164,7 @@ SamuroProc proc
 	pop ebp
 	ret 8
 	
-SamuroProc endp
+StackProcedureMain endp
 
 ;;Початок області code
 start:

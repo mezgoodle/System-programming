@@ -5,9 +5,9 @@ option casemap :none
 .data
 
 .code
-extern coeffsA: qword, coeffsB: qword, num2: qword, res2: qword, nulevinValue2:qword, tempValue:qword
-public KTZProc
-KTZProc proc
+extern coeffsA: qword, coeffsB: qword, num2: qword, res2: qword
+public ExternPublicProcedureMain
+ExternPublicProcedureMain proc
 	
 	finit
 	;;Вставка третього числа
@@ -27,27 +27,12 @@ KTZProc proc
 	fcos
 	;;Виконання тангенса
 	fdiv
-	
-	;;Перевірка на нуль у тангенсі
-	fcom    nulevinValue2 
-    fstsw   ax
-    SAHF
-    JE      foundedNulevinTan
-	
-	foundedNulevinTan:
-	
-	mov ebx, tempValue
-	mov
-	jmp stukovGates
-	
-	;;Віднімання у знаменнику
+	;;Віднімання у знаменнику	
 	fsub
 	fstp res2
 	
-	stukovGates:
-	
 	ret
 	
-KTZProc endp
+ExternPublicProcedureMain endp
 
 end
