@@ -5,9 +5,9 @@ option casemap :none
 .data
 
 .code
-extern coeffsA: qword, coeffsB: qword, numberTwoValue: qword, res2: qword
-public ExternPublicProcedureMain
-ExternPublicProcedureMain proc
+extern coeffsA: qword, coeffsB: qword, numberTwoValue: qword, ViverraResultat: qword
+public Viverra
+Viverra proc
 	
 	finit
 	;;Вставка третього числа
@@ -29,10 +29,10 @@ ExternPublicProcedureMain proc
 	fdiv
 	;;Віднімання у знаменнику	
 	fsub
-	fstp res2
+	fstp ViverraResultat
 	
 	ret
 	
-ExternPublicProcedureMain endp
+Viverra endp
 
 end

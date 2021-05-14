@@ -11,14 +11,14 @@ include /masm32/include/masm32rt.inc
 	;;Результат
 	calculation            DQ 0
 	;;Усі вхідні дані
-	coeffsA 			   DQ 0, 39.5, 6.35, 13.9, 27.5
-	coeffsB			       DQ 0, -1.41, -9.74, 28.4, -2.66
+	coeffsA 			   DQ 7.36, 39.5, 6.35, 13.9, 27.5
+	coeffsB			       DQ -2.25, -1.41, -9.74, 28.4, -2.66
 	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
 	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
-	numberTwoValue         		   DQ 2.0
 	nulevinValue           DQ 1.0
 	nulevinValue1          DQ -1.0
 	nulevinValue2          DQ 0.0
+	numberTwoValue         DQ 2.0
 	numberFourValue        DQ 4.0
 	;;Кількість рядків 
 	rows				   DD 5
@@ -65,8 +65,8 @@ include /masm32/include/masm32rt.inc
 	;;Буфер для обрахунків рядка
 	equationResultat      DQ 128 DUP (?)
 	
-	res1 dq ?
-	res2 dq ?
+	TinciduntResultat dq ?
+	ViverraResultat dq ?
 
 
 ;Макрос для обрахунку рядка
@@ -82,19 +82,19 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	
 	lea ecx, coeffsC[8*edi]
 	lea eax, firstCoef
-	call RegisterProcedureMain
+	call Tincidunt
 	
 	lea edx, elementD
-	lea eax, res1
+	lea eax, TinciduntResultat
 	push edx
 	push eax
-	call StackProcedureMain
+	call Malesuada
 	
-	call ExternPublicProcedureMain@0 ; викликаємо третю процедуру
+	call Viverra@0 ; викликаємо третю процедуру
 
 	finit
-	fld res1
-	fld res2
+	fld TinciduntResultat
+	fld ViverraResultat
 	
 	;;Перевірка на нуль у знаменнику
 	fcom    nulevinValue2 
@@ -132,10 +132,10 @@ getTheRow macro place, index
     invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
 endm
 
-public coeffsA, coeffsB, numberTwoValue, res2
-extern ExternPublicProcedureMain@0:near
+public coeffsA, coeffsB, numberTwoValue, ViverraResultat
+extern Viverra@0:near
 .code
-RegisterProcedureMain proc
+Tincidunt proc
 	finit
 	;;Вставка першого числа
 	fld qword ptr [ecx]
@@ -146,12 +146,12 @@ RegisterProcedureMain proc
 	fld1
 	;;Віднімання одиниці від попереднього обрахунку
 	fsub
-	mov eax, offset res1
+	mov eax, offset TinciduntResultat
 	fstp qword ptr [eax]
 	ret
-RegisterProcedureMain endp 
+Tincidunt endp 
 
-StackProcedureMain proc
+Malesuada proc
 	finit
 	push ebp
 	mov ebp, esp
@@ -164,7 +164,7 @@ StackProcedureMain proc
 	pop ebp
 	ret 8
 	
-StackProcedureMain endp
+Malesuada endp
 
 ;;Початок області code
 start:
