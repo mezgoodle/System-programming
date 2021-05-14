@@ -11,18 +11,23 @@ include /masm32/include/masm32rt.inc
 	;;Результат
 	calculation            DQ 0
 	;;Усі вхідні дані
-	coeffsA 			   DQ 7.36, 39.5, 6.35, 13.9, 27.5
-	coeffsB			       DQ -2.25, -1.41, -9.74, 28.4, -2.66
+	coeffsA 			   DQ 0, 39.5, 6.35, 13.9, 27.5
+	coeffsB			       DQ 0, -1.41, -9.74, 28.4, -2.66
 	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
 	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
-	numberTwoValue         DQ 2.0
+	num2         		   DQ 2.0
 	nulevinValue           DQ 1.0
 	nulevinValue1          DQ -1.0
+	nulevinValue2          DQ 0.0
 	numberFourValue        DQ 4.0
 	;;Кількість рядків 
 	rows				   DD 5
 	;;Кроковий буфер
 	stepWith         	   DD 0
+	
+	tempValue dq 40.0
+	tempValue1 dq 20.0
+	
 	;;Текст рівняння
 	equationText           DB "(4*c + d - 1) / (b - tg(a / 2))", 0
 	;;Тексти помилок
@@ -63,169 +68,140 @@ include /masm32/include/masm32rt.inc
 	rowShowing       	  DB 32 DUP (?)
 	;;Буфер для обрахунків рядка
 	equationResultat      DQ 128 DUP (?)
+	
+	res1 dq ?
+	res2 dq ?
 
 
 ;Макрос для обрахунку рядка
-calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef
+calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef, nulevinValue2, tempValue
+	
 	;;Заповнення буферів коефіцієнтами
 	invoke FloatToStr2, elementA, addr aElement
 	invoke FloatToStr2, elementB, addr bElement
 	invoke FloatToStr2, elementC, addr cElement
 	invoke FloatToStr2, elementD, addr dElement
-
-; (4*c + d - 1) / (b - tg(a / 2))
-
-	lea ecx, elementC
+	
+	;"(4*c + d - 1) / (b - tg(a / 2))"
+	
+	lea ecx, coeffsC[8*edi]
 	lea eax, firstCoef
-
-	call ProcedureNumberOne
+	call RaynorProc
 	
 	lea edx, elementD
-
+	lea eax, res1
 	push edx
-	push ecx
+	push eax
+	call SamuroProc
+	
+	mov tempValue, tempValue1
+	
+	call ExternPublicProcedureMain@0 ; викликаємо третю процедуру
 
-	call ProcedureNumberTwo
-
-	;;Вставка третього числа
-	fld elementB
-	;;Вставка четвертого числа та підготовка його для тангенса
-	fld elementA
-	fld secondCoef
-	;;Ділення аргумента для тангенса
-	fdiv
-	;;Оскільки у тангенса в знаменнику косинус, а косинус може мати значення - нуль, то тут помилка
-	;;По суті, ми робимо перевірку чи синус дорівнює 1 або -1
-	fsin
-	fcom    nulevinValue 
-    fstsw   AX
-    SAHF
-    JE      foundedTangensNulevin
-	fcom    nulevinValue1 
-    fstsw   AX
-    SAHF
-    JE      foundedTangensNulevin
-	fld elementA
-	fld secondCoef
-	;;Ділення аргумента для тангенса
-	fdiv
-	fcos
-	;;Виконання тангенса
-	fdiv
-	;;Віднімання у знаменнику	
-	fsub
+	finit
+	
+	fld tempValue
+	
 	;;Перевірка на нуль у знаменнику
-	fcom    nulevinValue 
-    fstsw   AX
+	fcom    nulevinValue2 
+    fstsw   ax
+    SAHF
+    JE      foundedTangensNulevin
+	
+	fld res1
+	fld res2
+	
+	;;Перевірка на нуль у знаменнику
+	fcom    nulevinValue2 
+    fstsw   ax
     SAHF
     JE      foundedNulevin
-	jne lastDivision
+
+	
+	fdiv
+	fstp calculation ; result = stack[0]
+	invoke FloatToStr2, calculation, addr bufferForResult
+	JMP stukovGates
 
 	foundedNulevin:
 	;;Нуль у знаменнику
 	invoke wsprintf, addr bufferForResult, addr errorNulevinText
 	JMP stukovGates
+	
 	foundedTangensNulevin:
 	;;Нуль в тангенсі
 	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
 	JMP stukovGates
+
 	
-	;////////////////
 	
-	lastDivision:
-	;;Останнє ділення
-	fdiv
-	;;Вставка результату в буфер
-	fstp calculation
-	invoke FloatToStr2, calculation, addr bufferForResult
-	
-	;;Вихід з макросу обрахунку
 	stukovGates:
+	
 endm
 
 ;Макрос для отримання усього рядка
 getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
-    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
+    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, num2
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
 endm
 
-	;public 
-	;extern ProcedureNumberThree@0:near 
-
+public coeffsA, coeffsB, num2, res2
+extern ExternPublicProcedureMain@0:near
 .code
+RaynorProc proc
+	finit
+	;;Вставка першого числа
+	fld qword ptr [ecx]
+	fld qword ptr [eax]
+	;;Перше множення в чисельнику
+	fmul
+	;;Вставка одиниці
+	fld1
+	;;Віднімання одиниці від попереднього обрахунку
+	fsub
+	mov eax, offset res1
+	fstp qword ptr [eax]
+	ret
+RaynorProc endp 
 
-ProcedureNumberOne proc
-
-finit
-
-;;Вставка першого числа
-fld qword ptr [ecx]
-
-fld qword ptr [eax]
-
-;;Перше множення в чисельнику
-fmul
-
-fstp qword ptr [ecx] ; ліва частина
+SamuroProc proc
+	finit
+	push ebp
+	mov ebp, esp
+	mov eax, [ebp + 8]
+	mov ebx, [ebp + 12]
+	fld qword ptr [edx]
+	fld qword ptr [eax]
+	fadd
+	fstp qword ptr [eax]
+	pop ebp
+	ret 8
 	
-ret
+SamuroProc endp
 
-ProcedureNumberOne endp
-
-
-ProcedureNumberTwo proc
-
-push ebp
-mov ebp, esp
-
-finit
-
-mov ecx, [ebp+8]
-mov edx, [ebp+12]
-
-;;Вставка частини чисельнику
-fld qword ptr [ecx]
-;;Вставка одиниці
-fld1
-;;Віднімання одиниці від попереднього обрахунку
-fsub
-;;Вставка другого числа
-fld qword ptr [edx]
-
-;;Сума в чисельнику
-fadd
-
-;fstp qword ptr [edx] ; права частина
-	
-pop ebp
-	
-ret 8
-
-ProcedureNumberTwo endp
-
-	;;Початок області code
-    start:
-		;;Заповнення буферу
-        mov stepWith, offset firstRow
-		;;Призначення
-		mov EDI, NULL
-		;Цикл для п'яти рядків
-        calculationLoop:
-        getTheRow stepWith, EDI
-        add stepWith, 128
-		;;Підвищення індекса
-        add EDI, 1
-		;Порівняння на кінець програми
-        CMP EDI, rows
-        JNE calculationLoop
-		;Показ усіх рядків
-		invoke wsprintf, addr equationResultat, addr equationText
-        invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr equationResultat, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
-        invoke MessageBox, NULL, offset endShowing, offset textOfWindow, MB_OK
-		;;Закінчення програми
-        invoke ExitProcess, NULL
-    end start
+;;Початок області code
+start:
+	;;Заповнення буферу
+	mov stepWith, offset firstRow
+	;;Призначення
+	mov EDI, NULL
+	;Цикл для п'яти рядків
+	calculationLoop:
+	getTheRow stepWith, EDI
+	add stepWith, 128
+	;;Підвищення індекса
+	add EDI, 1
+	;Порівняння на кінець програми
+	CMP EDI, rows
+	JNE calculationLoop
+	;Показ усіх рядків
+	invoke wsprintf, addr equationResultat, addr equationText
+	invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr equationResultat, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
+	invoke MessageBox, NULL, offset endShowing, offset textOfWindow, MB_OK
+	;;Закінчення програми
+	invoke ExitProcess, NULL
+end start
 	
