@@ -64,9 +64,9 @@ include /masm32/include/masm32rt.inc
 	rowShowing       	  DB 32 DUP (?)
 	;;Буфер для обрахунків рядка
 	equationResultat      DQ 128 DUP (?)
-	
-	TinciduntResultat dq ?
-	ViverraResultat dq ?
+	;; Буфери для результатів процедур
+	TinciduntResultat     DQ (?)
+	ViverraResultat       DQ (?)
 
 
 ;Макрос для обрахунку рядка
@@ -77,20 +77,20 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	invoke FloatToStr2, elementB, addr bElement
 	invoke FloatToStr2, elementC, addr cElement
 	invoke FloatToStr2, elementD, addr dElement
-	
-	;"(4*c + d - 1) / (b - tg(a / 2))"
-	
+	;;Підготовка даних для процедур
 	lea ecx, coeffsC[8*edi]
 	lea eax, firstCoef
+	;;Виклик першої процедури
 	call Tincidunt
-	
+	;;Підготовка даних для процедур
 	lea edx, elementD
 	lea eax, TinciduntResultat
 	push edx
 	push eax
+	;;Виклик другої процедури
 	call Malesuada
-	
-	call Viverra@0 ; викликаємо третю процедуру
+	;;Виклик третьої процедури
+	call Viverra@0
 
 	finit
 	fld TinciduntResultat
@@ -103,7 +103,7 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
     JE      foundedNulevin
 	
 	fdiv
-	fstp calculation ; result = stack[0]
+	fstp calculation
 	invoke FloatToStr2, calculation, addr bufferForResult
 	JMP stukovGates
 
@@ -116,22 +116,10 @@ calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondC
 	;;Нуль в тангенсі
 	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
 	JMP stukovGates
-
-	
-	
 	stukovGates:
-	
 endm
 
-;Макрос для отримання усього рядка
-getTheRow macro place, index
-	;;Показ коефіцієнтів
-	;;Обрахунок за допомогою коефіцієнтів
-    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
-	;;Показ усього рядка
-    invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
-endm
-
+;;Перша процедура
 public coeffsA, coeffsB, numberTwoValue, ViverraResultat
 extern Viverra@0:near
 .code
@@ -150,7 +138,7 @@ Tincidunt proc
 	fstp qword ptr [eax]
 	ret
 Tincidunt endp 
-
+;;Друга процедура
 Malesuada proc
 	finit
 	push ebp
@@ -163,8 +151,16 @@ Malesuada proc
 	fstp qword ptr [eax]
 	pop ebp
 	ret 8
-	
 Malesuada endp
+
+;Макрос для отримання усього рядка
+getTheRow macro place, index
+	;;Показ коефіцієнтів
+	;;Обрахунок за допомогою коефіцієнтів
+    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
+	;;Показ усього рядка
+    invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
+endm
 
 ;;Початок області code
 start:

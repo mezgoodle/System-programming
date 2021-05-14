@@ -2,13 +2,11 @@
 .model flat, stdcall
 option casemap :none 
 
-.data
-
 .code
+;;Третя процедура
 extern coeffsA: qword, coeffsB: qword, numberTwoValue: qword, ViverraResultat: qword
 public Viverra
 Viverra proc
-	
 	finit
 	;;Вставка третього числа
 	fld coeffsB[8*edi]
@@ -30,9 +28,6 @@ Viverra proc
 	;;Віднімання у знаменнику	
 	fsub
 	fstp ViverraResultat
-	
 	ret
-	
 Viverra endp
-
 end
