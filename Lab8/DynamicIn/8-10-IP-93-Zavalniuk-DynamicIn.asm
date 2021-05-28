@@ -26,9 +26,10 @@ include /masm32/include/masm32rt.inc
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
 	;;Результат на кожному рядку
-	bufferForResult 	  DB 2048 DUP(0)
-	libname DB "8-10-IP-93-Zavalniuk-DynamicIn-module", 0
-	functionName DB "calculateTheRow", 0
+	bufferForResult 	   DB 2048 DUP(0)
+	;;Дані для модуля
+	module 			       DB "8-10-IP-93-Zavalniuk-DynamicIn-module", 0
+	method		   		   DB "calculateTheRow", 0
 	
 .data?
 	;Оголошення даних
@@ -56,15 +57,14 @@ include /masm32/include/masm32rt.inc
 	rowShowing       	  DB 32 DUP (?)
 	;;Буфер для обрахунків рядка
 	equationResultat      DQ 128 DUP (?)
-	hlib DD ?
-	addressName DD ?
+	;;Змінні для виклику методу з модуля
+	dict DD ?
+	cityFunction DD ?
 
 
 ;Макрос для отримання усього рядка
 getTheRow macro place, index
-	;;Показ коефіцієнтів
-	;;Обрахунок за допомогою коефіцієнтів
-	;;Обраховуємо за допомогою макросу з модуля
+	;;Передача коефіцієнтів у модуль
 	lea  edx, coeffsD[index*8]
 	push  edx
 	lea  edx, coeffsC[index*8]
@@ -75,9 +75,11 @@ getTheRow macro place, index
 	push  edx
 	lea edx, bufferForResult
 	push edx
-
-	call [addressName]
-	
+	;;Обрахунок за допомогою коефіцієнтів
+	;;Обраховуємо за допомогою макросу з модуля
+	;;Виклик нашого динамічного модуля calculateTheRow для обрахунку
+	call [cityFunction]
+	;;Показ коефіцієнтів
 	invoke FloatToStr2, coeffsA[index*8], addr aElement
 	invoke FloatToStr2, coeffsB[index*8], addr bElement
 	invoke FloatToStr2, coeffsC[index*8], addr cElement
@@ -94,10 +96,10 @@ endm
 		;;Призначення
 		mov EDI, NULL
 		;Цикл для п'яти рядків
-		invoke LoadLibrary, addr libname
-		mov hlib, eax
-		invoke GetProcAddress, hlib, addr functionName
-		mov addressName, eax
+		invoke LoadLibrary, addr module
+		mov dict, eax
+		invoke GetProcAddress, dict, addr method
+		mov cityFunction, eax
         calculationLoop:
         getTheRow stepWith, EDI
         add stepWith, 128
@@ -106,7 +108,7 @@ endm
 		;Порівняння на кінець програми
         CMP EDI, rows
         JNE calculationLoop
-		invoke FreeLibrary, hlib
+		invoke FreeLibrary, dict
 		;Показ усіх рядків
 		invoke wsprintf, addr equationResultat, addr equationText
         invoke wsprintf, addr endShowing, addr allResultsInOnePlace, addr equationResultat, addr firstRow, addr secondRow, addr thirdRow, addr fourthRow, addr fifthRow
