@@ -27,6 +27,8 @@ calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
     allResultsInOnePlace   DB "Головне рiвняння -  %s", 10, "1) %s", 10, "2) %s", 10, "3) %s", 10, "4) %s", 10, "5) %s", 0
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
+	;;Результат на кожному рядку
+	bufferForResult 	  DB 2048 DUP(0)
 	
 .data?
 	;Оголошення даних
@@ -38,8 +40,6 @@ calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
     cElement              DB 32 DUP (?)
 	;;Елемент з масиву д
 	dElement 			  DB 32 DUP(?)
-	;;Результат на кожному рядку
-	bufferForResult 	  DQ 128 DUP(?)
 	;;Закінчення показу
 	endShowing            DB 1024 DUP (?)
 	;;Перший результат

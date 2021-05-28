@@ -79,17 +79,17 @@ calculateTheRow proc bufferForResult:ptr dword, elementA:ptr qword, elementB:ptr
 	fdiv
 	;;Вставка результату в буфер
 	fstp calculation
-	invoke FloatToStr2, calculation, addr bufferForResult
+	invoke FloatToStr2, calculation, bufferForResult
 	
 	JMP stukovGates
 	
 	foundedNulevin:
 	;;Нуль у знаменнику
-	invoke wsprintf, addr bufferForResult, addr errorNulevinText
+	invoke wsprintf, bufferForResult, addr errorNulevinText
 	JMP stukovGates
 	foundedTangensNulevin:
 	;;Нуль в тангенсі
-	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
+	invoke wsprintf, bufferForResult, addr errorNulevinTangensText
 	JMP stukovGates
 	;;Вихід з макросу обрахунку
 	stukovGates:
