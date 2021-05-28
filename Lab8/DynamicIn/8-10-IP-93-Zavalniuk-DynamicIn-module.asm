@@ -22,6 +22,12 @@ include /masm32/include/masm32rt.inc
 	
 ;Макрос для обрахунку рядка
 .code
+;;Точка входу
+Elmajor proc hInstDLL: dword, reason: dword, unused: dword
+	mov eax, 1 
+	ret
+Elmajor endp
+
 calculateTheRow proc bufferForResult: dword, elementA:ptr qword, elementB:ptr qword, elementC:ptr qword, elementD:ptr qword
 	;;Заповнення регістрів коефіцієнтами
 	;;Необхідно із-за математичних дій
@@ -96,4 +102,4 @@ calculateTheRow proc bufferForResult: dword, elementA:ptr qword, elementB:ptr qw
 	stukovGates:
 	ret
 calculateTheRow endp
-end
+end Elmajor

@@ -27,7 +27,7 @@ include /masm32/include/masm32rt.inc
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
 	;;Результат на кожному рядку
 	bufferForResult 	  DB 2048 DUP(0)
-	libname DB "8-10-IP-93-Zavalniuk-DynamicWithIn-module", 0
+	libname DB "8-10-IP-93-Zavalniuk-DynamicIn-module", 0
 	functionName DB "calculateTheRow", 0
 	
 .data?
