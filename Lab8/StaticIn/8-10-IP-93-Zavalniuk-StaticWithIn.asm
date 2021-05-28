@@ -3,13 +3,11 @@
 .model flat, stdcall
 option CaseMap:None
 
-;Під'єднання необхідних бібліотек
+;Під'єднання необхідної бібліотеки
 include /masm32/include/masm32rt.inc
 includelib 8-10-IP-93-Zavalniuk-StaticWithIn-module.lib
 
-;Оголошення макроса з модуля
 calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
-
 .data
 	;Оголошення даних
 	;;Усі вхідні дані
@@ -64,7 +62,6 @@ calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
 getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
-	;;Обраховуємо за допомогою макросу з модуля
     invoke calculateTheRow, addr bufferForResult, addr coeffsA[index*8], addr coeffsB[index*8], addr coeffsC[index*8], addr coeffsD[index*8]
 	invoke FloatToStr2, coeffsA[index*8], addr aElement
 	invoke FloatToStr2, coeffsB[index*8], addr bElement

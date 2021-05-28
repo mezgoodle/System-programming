@@ -8,7 +8,7 @@ include /masm32/include/masm32rt.inc
 
 
 .data
-	;Оголошення даних для даного модуля
+	;Оголошення даних
 	;;Результат
 	calculation            DQ 0
 	;;Усі вхідні дані
@@ -23,8 +23,7 @@ include /masm32/include/masm32rt.inc
 ;Макрос для обрахунку рядка
 .code
 calculateTheRow proc bufferForResult:ptr dword, elementA:ptr qword, elementB:ptr qword, elementC:ptr qword, elementD:ptr qword
-	;;Заповнення регістрів коефіцієнтами
-	;;Необхідно із-за математичних дій
+	;;Заповнення буферів коефіцієнтами
 	mov ecx, elementA
 	mov ebx, elementB
 	mov eax, elementC
