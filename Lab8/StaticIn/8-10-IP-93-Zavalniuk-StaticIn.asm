@@ -30,7 +30,7 @@ calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
 	;;Шаблон рядка-результату
     textOfRow              DB "a = %s, b = %s, c = %s, d = %s, результат = %s", 0
 	;;Результат на кожному рядку
-	bufferForResult 	  DB 2048 DUP(0)
+	bufferForResult 	   DB 2048 DUP(0)
 	
 .data?
 	;Оголошення даних
@@ -64,7 +64,7 @@ calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
 getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
-	;;Обраховуємо за допомогою макросу з модуля
+	;;Виклик нашого динамічного модуля calculateTheRow для обрахунку
     invoke calculateTheRow, addr bufferForResult, addr coeffsA[index*8], addr coeffsB[index*8], addr coeffsC[index*8], addr coeffsD[index*8]
 	invoke FloatToStr2, coeffsA[index*8], addr aElement
 	invoke FloatToStr2, coeffsB[index*8], addr bElement
