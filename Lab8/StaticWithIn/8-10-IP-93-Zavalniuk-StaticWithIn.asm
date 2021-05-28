@@ -7,30 +7,20 @@ option CaseMap:None
 include /masm32/include/masm32rt.inc
 includelib 8-10-IP-93-Zavalniuk-StaticWithIn-module.lib
 
-calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
-
+calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword
 .data
 	;Оголошення даних
-	;;Результат
-	calculation            DQ 0
 	;;Усі вхідні дані
 	coeffsA 			   DQ 7.36, 39.5, 6.35, 13.9, 27.5
 	coeffsB			       DQ -2.25, -1.41, -9.74, 28.4, -2.66
 	coeffsC				   DQ 24.3, 6.44, -16.25, 22.45, 5.53
 	coeffsD				   DQ 35.9, 18.6, 32.4, 10.18, 19.18
-	numberTwoValue         DQ 2.0
-	nulevinValue           DQ 1.0
-	nulevinValue1          DQ -1.0
-	numberFourValue        DQ 4.0
 	;;Кількість рядків 
 	rows				   DD 5
 	;;Кроковий буфер
 	stepWith         	   DD 0
 	;;Текст рівняння
 	equationText           DB "(4*c + d - 1) / (b - tg(a / 2))", 0
-	;;Тексти помилок
-	errorNulevinText       DB "Помилка, ділення на нуль", 0
-	errorNulevinTangensText DB "Помилка, косинус дорівнює нулеві", 0
 	;;Текст користувацького вікна зверху
     textOfWindow       	   DB "Математичні розрахунки", 0
 	;;Шаблон усіх результатів
@@ -68,85 +58,15 @@ calculateTheRow proto:ptr dword, :ptr qword, :ptr qword, :ptr qword, :ptr qword,
 	equationResultat      DQ 128 DUP (?)
 
 
-;Макрос для обрахунку рядка
-calculateTheRow macro elementA, elementB, elementC, elementD, firstCoef, secondCoef
-	;;Заповнення буферів коефіцієнтами
-	invoke FloatToStr2, elementA, addr aElement
-	invoke FloatToStr2, elementB, addr bElement
-	invoke FloatToStr2, elementC, addr cElement
-	invoke FloatToStr2, elementD, addr dElement
-
-	finit
-	;;Вставка першого числа
-	fld elementC
-	fld firstCoef
-	;;Перше множення в чисельнику
-	fmul
-	;;Вставка одиниці
-	fld1
-	;;Віднімання одиниці від попереднього обрахунку
-	fsub
-	;;Вставка другого числа
-	fld elementD
-	;;Сума в чисельнику
-	fadd
-	;;Вставка третього числа
-	fld elementB
-	;;Вставка четвертого числа та підготовка його для тангенса
-	fld elementA
-	fld secondCoef
-	;;Ділення аргумента для тангенса
-	fdiv
-	;;Оскільки у тангенса в знаменнику косинус, а косинус може мати значення - нуль, то тут помилка
-	;;По суті, ми робимо перевірку чи синус дорівнює 1 або -1
-	fsin
-	fcom    nulevinValue 
-    fstsw   AX
-    SAHF
-    JE      foundedTangensNulevin
-	fcom    nulevinValue1 
-    fstsw   AX
-    SAHF
-    JE      foundedTangensNulevin
-	fld elementA
-	fld secondCoef
-	;;Ділення аргумента для тангенса
-	fdiv
-	fcos
-	;;Виконання тангенса
-	fdiv
-	;;Віднімання у знаменнику	
-	fsub
-	;;Перевірка на нуль у знаменнику
-	fcom    nulevinValue 
-    fstsw   AX
-    SAHF
-    JE      foundedNulevin
-	;;Останнє ділення
-	fdiv
-	;;Вставка результату в буфер
-	fstp calculation
-	invoke FloatToStr2, calculation, addr bufferForResult
-	
-	JMP stukovGates
-	
-	foundedNulevin:
-	;;Нуль у знаменнику
-	invoke wsprintf, addr bufferForResult, addr errorNulevinText
-	JMP stukovGates
-	foundedTangensNulevin:
-	;;Нуль в тангенсі
-	invoke wsprintf, addr bufferForResult, addr errorNulevinTangensText
-	JMP stukovGates
-	;;Вихід з макросу обрахунку
-	stukovGates:
-endm
-
 ;Макрос для отримання усього рядка
 getTheRow macro place, index
 	;;Показ коефіцієнтів
 	;;Обрахунок за допомогою коефіцієнтів
-    calculateTheRow coeffsA[index*8], coeffsB[index*8], coeffsC[index*8], coeffsD[index*8], numberFourValue, numberTwoValue
+    invoke calculateTheRow, addr bufferForResult, addr coeffsA[index*8], addr coeffsB[index*8], addr coeffsC[index*8], addr coeffsD[index*8]
+	invoke FloatToStr2, coeffsA[index*8], addr aElement
+	invoke FloatToStr2, coeffsB[index*8], addr bElement
+	invoke FloatToStr2, coeffsC[index*8], addr cElement
+	invoke FloatToStr2, coeffsD[index*8], addr dElement
 	;;Показ усього рядка
     invoke wsprintf, place, addr textOfRow, addr aElement, addr bElement, addr cElement, addr dElement, addr bufferForResult
 endm

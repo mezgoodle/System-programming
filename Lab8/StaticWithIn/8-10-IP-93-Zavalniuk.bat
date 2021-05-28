@@ -10,7 +10,7 @@
     if exist "%libname%.lib"  del "%libname%.lib"
 
     \masm32\bin\ml /c /coff "%libname%.asm"
-    \masm32\bin\Link.exe /OUT:"%libname%.dll" /DEF:%libname%.def /NOENTRY /DLL "%libname%.obj"
+    \masm32\bin\Link.exe /OUT:"%libname%.dll" /DEF:%filename%.def /NOENTRY /DLL "%libname%.obj"
 
     \masm32\bin\ml /c /coff "%filename%.asm"
     if errorlevel 1 goto errasm
