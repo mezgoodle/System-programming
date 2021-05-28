@@ -8,7 +8,7 @@ include /masm32/include/masm32rt.inc
 
 
 .data
-	;Оголошення даних
+	;Оголошення даних для даного модуля
 	;;Результат
 	calculation            DQ 0
 	;;Усі вхідні дані
@@ -20,10 +20,18 @@ include /masm32/include/masm32rt.inc
 	errorNulevinText       DB "Помилка, ділення на нуль", 0
 	errorNulevinTangensText DB "Помилка, косинус дорівнює нулеві", 0
 	
-;Макрос для обрахунку рядка
+
 .code
+;;Точка входу
+Elmajor proc hInstDLL: dword, reason: dword, unused: dword
+	mov eax, 1 
+	ret
+Elmajor endp
+
+;Макрос для обрахунку рядка
 calculateTheRow proc bufferForResult:ptr dword, elementA:ptr qword, elementB:ptr qword, elementC:ptr qword, elementD:ptr qword
-	;;Заповнення буферів коефіцієнтами
+	;;Заповнення регістрів коефіцієнтами
+	;;Необхідно із-за математичних дій
 	mov ecx, elementA
 	mov ebx, elementB
 	mov eax, elementC
@@ -95,4 +103,4 @@ calculateTheRow proc bufferForResult:ptr dword, elementA:ptr qword, elementB:ptr
 	stukovGates:
 	ret
 calculateTheRow endp
-end
+end Elmajor
