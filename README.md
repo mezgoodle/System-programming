@@ -4,7 +4,7 @@ My labs for system programming in KPI
 
 ## Installation
 
-You can just [download](https://github.com/mezgoodle/numericalMethods_labs/archive/master.zip) this code like zip archive, then unzip and use.
+You can just [download](https://github.com/mezgoodle/numericalMethods_labs/archive/master.zip) this code like zip archive, then unzip and use. But don't do this
 
 ## Labs list
 
